@@ -766,7 +766,7 @@ modalOverlay.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// AUTENTICAÇÃO - CORRIGIDA
+// AUTENTICAÇÃO
 // ============================================================
 async function registerUser(user) {
     try {
@@ -816,7 +816,6 @@ async function checkIfUserIsBanned(user) {
 function showBannedScreen(reason = 'Violação das políticas de uso') {
     banDetails.textContent = `Motivo: ${reason}`;
     bannedOverlay.classList.add('show');
-    // Desabilita interações, mas permite o logout
     document.querySelector('.main-container').style.opacity = '0.3';
     document.querySelector('.main-container').style.pointerEvents = 'none';
     document.querySelector('.header').style.opacity = '0.3';
@@ -825,7 +824,6 @@ function showBannedScreen(reason = 'Violação das políticas de uso') {
 
 async function logoutBanned() {
     try {
-        // Desabilita o botão para evitar múltiplos cliques
         const btn = document.querySelector('.btn-logout-banned');
         if (btn) {
             btn.disabled = true;
@@ -833,18 +831,15 @@ async function logoutBanned() {
         }
         
         await auth.signOut();
-        // Pequeno delay para garantir que o logout foi processado
         setTimeout(() => {
             window.location.href = 'login.html';
         }, 100);
     } catch (error) {
         console.error('Erro ao fazer logout:', error);
-        // Fallback: tenta novamente
         try {
             await auth.signOut();
             window.location.href = 'login.html';
         } catch (e) {
-            // Último recurso: redirecionamento forçado
             window.location.href = 'login.html';
         }
     }
@@ -903,28 +898,25 @@ function updateUI() {
     }
 }
 
-// CORREÇÃO: Event listener do logout
+// Event listener do logout
 btnLogout.addEventListener('click', async (e) => {
     e.preventDefault();
     try {
-        // Se estiver banido, usa a função específica
         if (isBanned) {
             await logoutBanned();
             return;
         }
-        // Logout normal
         await auth.signOut();
         window.location.href = 'login.html';
     } catch (error) {
         console.error('Erro no logout:', error);
-        // Fallback: força o logout
         await auth.signOut();
         window.location.href = 'login.html';
     }
 });
 
 // ============================================================
-// INICIALIZAÇÃO - CORRIGIDA (VERSÃO FINAL)
+// INICIALIZAÇÃO - CORRIGIDA
 // ============================================================
 auth.onAuthStateChanged(async (user) => {
     try {
@@ -935,18 +927,15 @@ auth.onAuthStateChanged(async (user) => {
             await registerUser(user);
             await loadUserProfile(user.uid);
             
-            // Log do estado
-            console.log('📊 Estado do usuário:', { isBanned, isAdmin, uid: user.uid });
+            console.log('📊 Estado:', { isBanned, isAdmin, uid: user.uid });
             
-            // Atualiza a UI (mostra tela de banimento se necessário)
+            // Atualiza a UI
             updateUI();
             
-            // Se estiver banido, não carrega o dashboard
+            // Se estiver banido
             if (isBanned) {
                 console.log('🚫 Usuário banido!');
-                // Mostra a tela de banimento
                 showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
-                // Não carrega nenhuma página
                 pageContainer.innerHTML = `
                     <div style="text-align:center;padding:40px 20px;color:#666;">
                         <span class="material-icons" style="font-size:48px;">lock</span>
@@ -957,7 +946,7 @@ auth.onAuthStateChanged(async (user) => {
                 return;
             }
             
-            // Carrega o dashboard para usuários não banidos
+            // Carrega o dashboard
             console.log('📊 Carregando dashboard...');
             navigateTo('dashboard');
         } else {
@@ -968,15 +957,13 @@ auth.onAuthStateChanged(async (user) => {
             isAdmin = false;
             userProfile = null;
             
-            // Verifica se já não está na página de login para evitar loop
+            // Redireciona para login se não estiver já na página
             if (!window.location.pathname.includes('login.html')) {
-                console.log('🔄 Redirecionando para login...');
                 window.location.href = 'login.html';
             }
         }
     } catch (error) {
         console.error('❌ Erro na inicialização:', error);
-        // Em caso de erro, redireciona para login
         if (!window.location.pathname.includes('login.html')) {
             window.location.href = 'login.html';
         }
@@ -1354,7 +1341,6 @@ async function renderPlataformas() {
         { id: 'central', name: 'Central do Usuário', icon: 'dashboard', url: '#', color: '#4a148c' }
     ];
     
-    // Contar ações por plataforma
     let actionCounts = {};
     try {
         const snap = await db.collection('user_actions')
@@ -1521,7 +1507,6 @@ function renderAdminActionsList() {
         </div>
     `;
     
-    // Paginação
     let paginationHTML = '<div class="pagination">';
     if (adminActionPage > 1) {
         paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(1)">«</button>`;
@@ -1559,43 +1544,6 @@ function goToAdminPage(page) {
     renderAdminActionsList();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-// ============================================================
-// INICIALIZAÇÃO
-// ============================================================
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        currentUser = user;
-        await registerUser(user);
-        await loadUserProfile(user.uid);
-        
-        if (isBanned) {
-            updateUI();
-            navigateTo('dashboard');
-            return;
-        }
-        
-        updateUI();
-        navigateTo('dashboard');
-    } else {
-        currentUser = null;
-        isBanned = false;
-        updateUI();
-        window.location.href = 'login.html';
-    // No final do onAuthStateChanged, quando o usuário não está logado
-} else {
-    currentUser = null;
-    isBanned = false;
-    // Verifica se já não está na página de login para evitar loop
-    if (!window.location.pathname.includes('login.html')) {
-        window.location.href = 'login.html';
-    }
-}
-    
-});
-
-console.log('🚀 Central do Usuário WazzimaGiygg - Versão Histórico (Somente Leitura)');
-console.log('📌 Ações integradas das plataformas: acadêmico, jornal, wiki, support');
 </script>
 </body>
 </html>
