@@ -79,6 +79,27 @@
             margin-top: 4px;
         }
 
+        .return-info {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #4ade80;
+            font-size: 0.85em;
+        }
+
+        .return-info.show {
+            display: flex;
+        }
+
+        .return-info .material-icons {
+            font-size: 18px;
+        }
+
         .login-box {
             background: rgba(255, 255, 255, 0.08);
             border-radius: 16px;
@@ -498,6 +519,12 @@
         <p>Central do Usuário - Acesse sua conta</p>
     </div>
 
+    <!-- Return Info - mostra para onde vai redirecionar -->
+    <div id="returnInfo" class="return-info">
+        <span class="material-icons">sync_alt</span>
+        <span>Você será redirecionado de volta para: <strong id="returnUrl">Central</strong></span>
+    </div>
+
     <div class="login-box">
         <div class="login-title">🔐 Acesse sua conta</div>
         <div class="login-subtitle">Entre para acessar todas as funcionalidades</div>
@@ -614,6 +641,74 @@ const bannedOverlay = document.getElementById('bannedOverlay');
 const banDetails = document.getElementById('banDetails');
 const logoutBannedBtn = document.getElementById('logoutBannedBtn');
 const loginContainer = document.getElementById('loginContainer');
+const returnInfo = document.getElementById('returnInfo');
+const returnUrl = document.getElementById('returnUrl');
+
+// ============================================================
+// REDIRECIONAMENTO PERSONALIZADO
+// ============================================================
+
+// Pega o parâmetro uid da URL
+function getRedirectUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get('uid');
+    
+    if (uid && uid.trim() !== '') {
+        // Verifica se é uma URL válida
+        let url = uid.trim();
+        
+        // Se não tiver protocolo, adiciona https://
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        
+        // Verifica se é um domínio válido
+        try {
+            const urlObj = new URL(url);
+            // Permite apenas domínios específicos (whitelist)
+            const allowedDomains = [
+                'wazzimagiygg.com',
+                'forum.wazzimagiygg.com',
+                'academico.wazzimagiygg.com',
+                'jornal.wazzimagiygg.com',
+                'wiki.wazzimagiygg.com',
+                'support.wazzimagiygg.com'
+            ];
+            
+            // Verifica se o domínio está na whitelist
+            const isAllowed = allowedDomains.some(domain => 
+                urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+            );
+            
+            if (isAllowed) {
+                return url;
+            } else {
+                console.warn('Domínio não permitido:', urlObj.hostname);
+                return null;
+            }
+        } catch (e) {
+            console.warn('URL inválida:', url);
+            return null;
+        }
+    }
+    
+    return null;
+}
+
+// Obtém a URL de redirecionamento
+const redirectTo = getRedirectUrl();
+
+// Mostra a informação de redirecionamento
+if (redirectTo) {
+    returnInfo.classList.add('show');
+    // Mostra o nome do site
+    try {
+        const urlObj = new URL(redirectTo);
+        returnUrl.textContent = urlObj.hostname;
+    } catch (e) {
+        returnUrl.textContent = redirectTo;
+    }
+}
 
 // ============================================================
 // FUNÇÕES DE UTILIDADE
@@ -629,7 +724,6 @@ function showError(message) {
 function showLoading(message = 'Autenticando...') {
     loadingText.textContent = message;
     loadingOverlay.classList.add('show');
-    // Desabilita botões durante loading
     googleLoginBtn.disabled = true;
     guestLoginBtn.disabled = true;
 }
@@ -673,11 +767,23 @@ function getStoredGuestUser() {
         }
     } catch (e) {
         console.log('Erro ao ler guest user:', e);
-        // Limpa dados corrompidos
         localStorage.removeItem('wzzm_guest_user');
         localStorage.removeItem('wzzm_guest_expiry');
     }
     return null;
+}
+
+// ============================================================
+// FUNÇÃO DE REDIRECIONAMENTO
+// ============================================================
+function performRedirect() {
+    if (redirectTo) {
+        console.log('🔄 Redirecionando para:', redirectTo);
+        window.location.href = redirectTo;
+    } else {
+        console.log('🔄 Redirecionando para index.html');
+        window.location.href = 'index.html';
+    }
 }
 
 // ============================================================
@@ -687,11 +793,9 @@ async function registerUser(user) {
     try {
         const uid = user.uid;
         
-        // Verifica se o usuário já existe
         const userDoc = await db.collection('users').doc(uid).get();
         const existingData = userDoc.exists ? userDoc.data() : {};
         
-        // Verifica se é admin específico
         const ADMIN_UIDS = ['sZxfMuOBPbXdR8nttVPXIN8QOOl1', '6aPqWVh8JVYL5NqEb78iDGPD7dH3'];
         const isAdmin = existingData.isAdmin || ADMIN_UIDS.includes(uid);
         const isBanned = existingData.isBanned || false;
@@ -713,7 +817,6 @@ async function registerUser(user) {
         await db.collection('users').doc(uid).set(userData, { merge: true });
         await db.collection('usuários').doc(uid).set(userData, { merge: true });
         
-        // Registra no perfil do fórum
         await db.collection('maspia').doc('usuarios').collection('perfis').doc(uid).set({
             email: user.email,
             name: user.displayName,
@@ -765,10 +868,8 @@ googleLoginBtn.addEventListener('click', async () => {
         
         showLoading('Registrando usuário...');
         
-        // Registra o usuário
         await registerUser(user);
         
-        // Verifica se está banido
         const isBanned = await checkIfUserIsBanned(user);
         
         if (isBanned) {
@@ -777,17 +878,16 @@ googleLoginBtn.addEventListener('click', async () => {
             return;
         }
         
-        // Login bem-sucedido
         hideLoading();
-        window.location.href = 'index.html';
+        // Redireciona usando a função personalizada
+        performRedirect();
         
     } catch (error) {
         hideLoading();
         console.error('Erro no login Google:', error);
         
-        // Se o usuário já está logado, redireciona
         if (auth.currentUser) {
-            window.location.href = 'index.html';
+            performRedirect();
             return;
         }
         
@@ -813,9 +913,8 @@ guestLoginBtn.addEventListener('click', () => {
     errorMessage.classList.remove('show');
     
     try {
-        // Gera um UID para convidado
         const guestUID = generateGuestUID();
-        const expiry = Date.now() + (24 * 60 * 60 * 1000); // 24 horas
+        const expiry = Date.now() + (24 * 60 * 60 * 1000);
         
         const guestUser = {
             uid: guestUID,
@@ -824,12 +923,12 @@ guestLoginBtn.addEventListener('click', () => {
             isGuest: true
         };
         
-        // Salva no localStorage
         localStorage.setItem('wzzm_guest_user', JSON.stringify(guestUser));
         localStorage.setItem('wzzm_guest_expiry', expiry.toString());
         
         hideLoading();
-        window.location.href = 'index.html';
+        // Redireciona usando a função personalizada
+        performRedirect();
         
     } catch (error) {
         hideLoading();
@@ -837,36 +936,23 @@ guestLoginBtn.addEventListener('click', () => {
     }
 });
 
-// Continue Button - verifica se já está logado
+// Continue Button
 continueBtn.addEventListener('click', () => {
-    try {
-        window.location.href = 'index.html';
-    } catch (e) {
-        window.location.reload();
-    }
+    performRedirect();
 });
 
 // ============================================================
-// LOGOUT BANNED CORRIGIDO
+// LOGOUT BANNED
 // ============================================================
 async function logoutBanned() {
     try {
-        // Limpa dados
         localStorage.removeItem('wzzm_guest_user');
         localStorage.removeItem('wzzm_guest_expiry');
-        
-        // Faz logout do Firebase
         await auth.signOut();
-        
-        // Esconde overlay
         hideBannedScreen();
-        
-        // Recarrega a página
         window.location.reload();
-        
     } catch (error) {
         console.error('Erro ao fazer logout:', error);
-        // Força recarregamento mesmo com erro
         window.location.reload();
     }
 }
@@ -878,7 +964,6 @@ logoutBannedBtn.addEventListener('click', logoutBanned);
 // ============================================================
 async function checkExistingSession() {
     try {
-        // Verifica usuário convidado
         const guestUser = getStoredGuestUser();
         if (guestUser) {
             statusUserName.textContent = 'Convidado';
@@ -888,7 +973,6 @@ async function checkExistingSession() {
             return true;
         }
         
-        // Verifica usuário autenticado do Firebase
         const user = auth.currentUser;
         if (user) {
             const isBanned = await checkIfUserIsBanned(user);
@@ -905,7 +989,6 @@ async function checkExistingSession() {
         
     } catch (error) {
         console.log('Erro ao verificar sessão:', error);
-        // Limpa dados corrompidos
         localStorage.removeItem('wzzm_guest_user');
         localStorage.removeItem('wzzm_guest_expiry');
     }
@@ -917,10 +1000,8 @@ async function checkExistingSession() {
 // INICIALIZAÇÃO
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // Verifica se já tem sessão ativa
     await checkExistingSession();
     
-    // Observa mudanças de autenticação
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             try {
@@ -937,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('Erro ao verificar status do usuário:', error);
             }
         } else {
-            // Remove convidado expirado
             if (!getStoredGuestUser()) {
                 userStatus.classList.remove('show');
                 continueBtn.classList.remove('show');
@@ -956,7 +1036,12 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 console.log('🔐 Página de Login WazzimaGiygg carregada!');
-console.log('📌 Versão 2.0 - Corrigida com tratamento de erros');
+console.log('📌 Versão 2.0 - Com redirecionamento personalizado');
+if (redirectTo) {
+    console.log('🔄 Redirecionamento ativo para:', redirectTo);
+} else {
+    console.log('🔄 Redirecionamento padrão para: index.html');
+}
 </script>
 
 </body>
