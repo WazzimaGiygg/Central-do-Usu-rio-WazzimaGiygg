@@ -924,42 +924,67 @@ btnLogout.addEventListener('click', async (e) => {
 });
 
 // ============================================================
-// INICIALIZAÇÃO - CORRIGIDA
+// INICIALIZAÇÃO - CORRIGIDA (VERSÃO FINAL)
 // ============================================================
 auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        currentUser = user;
-        await registerUser(user);
-        await loadUserProfile(user.uid);
-        
-        // Atualiza a UI (mostra tela de banimento se necessário)
-        updateUI();
-        
-        // Se estiver banido, não carrega o dashboard
-        if (isBanned) {
-            // Mostra a tela de banimento
-            showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
-            // Não carrega nenhuma página
-            pageContainer.innerHTML = `
-                <div style="text-align:center;padding:40px 20px;color:#666;">
-                    <span class="material-icons" style="font-size:48px;">lock</span>
-                    <h3>Acesso Restrito</h3>
-                    <p>Sua conta foi banida. Entre em contato com o suporte.</p>
-                </div>
-            `;
-            return;
+    try {
+        if (user) {
+            // Usuário está logado
+            console.log('✅ Usuário logado:', user.uid);
+            currentUser = user;
+            await registerUser(user);
+            await loadUserProfile(user.uid);
+            
+            // Log do estado
+            console.log('📊 Estado do usuário:', { isBanned, isAdmin, uid: user.uid });
+            
+            // Atualiza a UI (mostra tela de banimento se necessário)
+            updateUI();
+            
+            // Se estiver banido, não carrega o dashboard
+            if (isBanned) {
+                console.log('🚫 Usuário banido!');
+                // Mostra a tela de banimento
+                showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
+                // Não carrega nenhuma página
+                pageContainer.innerHTML = `
+                    <div style="text-align:center;padding:40px 20px;color:#666;">
+                        <span class="material-icons" style="font-size:48px;">lock</span>
+                        <h3>Acesso Restrito</h3>
+                        <p>Sua conta foi banida. Entre em contato com o suporte.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Carrega o dashboard para usuários não banidos
+            console.log('📊 Carregando dashboard...');
+            navigateTo('dashboard');
+        } else {
+            // Usuário NÃO está logado
+            console.log('❌ Usuário não logado');
+            currentUser = null;
+            isBanned = false;
+            isAdmin = false;
+            userProfile = null;
+            
+            // Verifica se já não está na página de login para evitar loop
+            if (!window.location.pathname.includes('login.html')) {
+                console.log('🔄 Redirecionando para login...');
+                window.location.href = 'login.html';
+            }
         }
-        
-        // Carrega o dashboard para usuários não banidos
-        navigateTo('dashboard');
-    } else {
-        // Usuário não está logado
-        currentUser = null;
-        isBanned = false;
-        // Redireciona para login
-        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        // Em caso de erro, redireciona para login
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.href = 'login.html';
+        }
     }
 });
+
+console.log('🚀 Central do Usuário WazzimaGiygg - Versão Histórico (Somente Leitura)');
+console.log('📌 Ações integradas das plataformas: acadêmico, jornal, wiki, support');
 
 // ============================================================
 // NAVEGAÇÃO
