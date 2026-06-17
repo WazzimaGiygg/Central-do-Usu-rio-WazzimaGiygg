@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central do Usuário - Histórico de Ações</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .logo-area img {
+            height: 40px;
+            border-radius: 8px;
+        }
+        .logo-area h1 {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .logo-area small {
+            font-size: 0.7em;
+            opacity: 0.7;
+            display: block;
+            font-weight: 300;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .user-avatar:hover { transform: scale(1.05); }
+        .user-name { font-weight: 500; font-size: 0.9em; }
+        .user-email { font-size: 0.75em; opacity: 0.7; }
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+        .badge-admin {
+            background: #e94560;
+            color: white;
+            font-size: 0.6em;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-banned {
+            background: #dc3545;
+            color: white;
+            font-size: 0.6em;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* BANNED OVERLAY */
+        .banned-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .banned-overlay.show { display: flex; }
+        .banned-box {
+            background: #1a1a1a;
+            border: 2px solid #e94560;
+            border-radius: 16px;
+            padding: 50px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            color: white;
+        }
+        .banned-box .icon { font-size: 80px; margin-bottom: 20px; }
+        .banned-box h2 { color: #e94560; margin-bottom: 15px; }
+        .banned-box p { color: #aaa; margin-bottom: 20px; line-height: 1.6; }
+        .banned-box .btn-logout-banned {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .banned-box .btn-logout-banned:hover { background: #c0392b; }
+        .banned-box .ban-details {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #888;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+        .sidebar-title {
+            padding: 0 16px 12px;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            color: #888;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            color: #444;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        .sidebar-item:hover {
+            background: #f5f6fa;
+            color: #1a1a2e;
+        }
+        .sidebar-item.active {
+            background: #eef2ff;
+            border-left-color: #4a6cf7;
+            color: #4a6cf7;
+            font-weight: 500;
+        }
+        .sidebar-item .material-icons {
+            font-size: 22px;
+            width: 28px;
+            text-align: center;
+        }
+        .sidebar-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 16px;
+        }
+        .sidebar-badge {
+            margin-left: auto;
+            background: #4a6cf7;
+            color: white;
+            font-size: 0.65em;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .sidebar-badge.green { background: #2ecc71; }
+        .sidebar-badge.orange { background: #f39c12; }
+        .sidebar-badge.red { background: #e74c3c; }
+
+        /* CONTENT */
+        .content-area {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            min-height: 500px;
+        }
+        .page-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1a1a2e;
+        }
+        .page-subtitle {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 24px;
+        }
+        .page { display: none; animation: fadeIn 0.25s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #eef2f7;
+        }
+        .stat-card .number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .stat-card .label {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 4px;
+        }
+        .stat-card .icon {
+            float: right;
+            font-size: 2em;
+            color: #4a6cf7;
+            opacity: 0.3;
+        }
+
+        /* TABLES */
+        .table-container { overflow-x: auto; margin-top: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th {
+            text-align: left;
+            padding: 12px 14px;
+            background: #f8f9fc;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #eef2f7;
+        }
+        td { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; }
+        tr:hover td { background: #fafbfd; }
+
+        /* FILTERS */
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fc;
+            border-radius: 12px;
+        }
+        .filters select, .filters input {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9em;
+            background: white;
+        }
+        .filters select:focus, .filters input:focus {
+            outline: none;
+            border-color: #4a6cf7;
+        }
+
+        /* CARDS */
+        .card {
+            border: 1px solid #eef2f7;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            border-color: #4a6cf7;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 1em;
+        }
+        .card-meta {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 8px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .card-preview {
+            margin-top: 8px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .platform-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 500;
+        }
+        .platform-badge.academico { background: #e3f2fd; color: #0d47a1; }
+        .platform-badge.jornal { background: #fce4ec; color: #c62828; }
+        .platform-badge.wiki { background: #e8f5e9; color: #1b5e20; }
+        .platform-badge.support { background: #fff3e0; color: #e65100; }
+        .platform-badge.central { background: #f3e5f5; color: #4a148c; }
+
+        .action-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 500;
+        }
+        .action-badge.create { background: #d4edda; color: #155724; }
+        .action-badge.update { background: #cce5ff; color: #004085; }
+        .action-badge.delete { background: #f8d7da; color: #721c24; }
+        .action-badge.view { background: #e2e3e5; color: #383d41; }
+        .action-badge.login { background: #d1ecf1; color: #0c5460; }
+        .action-badge.logout { background: #f5c6cb; color: #721c24; }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .pagination-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            color: #333;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: #4a6cf7;
+            color: white;
+            border-color: #4a6cf7;
+        }
+        .pagination-btn.active {
+            background: #4a6cf7;
+            color: white;
+            border-color: #4a6cf7;
+            cursor: default;
+        }
+        .pagination-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .pagination-dots {
+            padding: 8px 4px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .empty-state .material-icons {
+            font-size: 48px;
+            opacity: 0.4;
+            margin-bottom: 12px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #4a6cf7;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 92%;
+            padding: 28px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-box h2 { font-size: 1.3em; margin-bottom: 6px; }
+        .modal-box .close-modal {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-box .close-modal:hover { color: #333; }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 12px 16px;
+            }
+            .sidebar {
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                padding: 10px 12px;
+            }
+            .sidebar-title { display: none; }
+            .sidebar-item {
+                padding: 8px 14px;
+                border-left: none;
+                border-radius: 8px;
+                font-size: 0.8em;
+                background: #f5f6fa;
+            }
+            .sidebar-item .material-icons { font-size: 18px; width: 22px; }
+            .sidebar-item.active {
+                background: #4a6cf7;
+                color: white;
+            }
+            .sidebar-divider { display: none; }
+            .sidebar-badge { display: none; }
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .user-info { justify-content: space-between; }
+            .content-area { padding: 16px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .filters { flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .user-name, .user-email { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BANNED OVERLAY -->
+<div id="bannedOverlay" class="banned-overlay">
+    <div class="banned-box">
+        <div class="icon">🚫</div>
+        <h2>⚠️ Conta Banida</h2>
+        <p>Sua conta foi banida permanentemente do sistema.</p>
+        <div id="banDetails" class="ban-details">Motivo: Violação das políticas de uso</div>
+        <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-content">
+        <div class="logo-area" onclick="navigateTo('dashboard')">
+            <img src="https://wazzimagiygg.com/favicom.png" alt="Logo">
+            <div>
+                <h1>Central do Usuário</h1>
+                <small>WazzimaGiygg Core</small>
+            </div>
+        </div>
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <div>
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail">aguarde</div>
+            </div>
+            <span id="userBadge"></span>
+            <button class="btn-logout" id="btnLogout">Sair</button>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN -->
+<div class="main-container">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-title">Menu</div>
+        
+        <a class="sidebar-item active" data-page="dashboard">
+            <span class="material-icons">dashboard</span> Dashboard
+        </a>
+        <a class="sidebar-item" data-page="historico">
+            <span class="material-icons">history</span> Histórico
+            <span class="sidebar-badge" id="actionCount">0</span>
+        </a>
+        
+        <div class="sidebar-divider"></div>
+        
+        <a class="sidebar-item" data-page="plataformas">
+            <span class="material-icons">public</span> Plataformas
+        </a>
+        
+        <div class="sidebar-divider" id="adminDivider" style="display:none;"></div>
+        <div id="adminSection" style="display:none;">
+            <div class="sidebar-title">Administração</div>
+            <a class="sidebar-item" data-page="admin-actions">
+                <span class="material-icons">fact_check</span> Todas as Ações
+            </a>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="content-area" id="contentArea">
+        <div id="pageContainer">
+            <div class="loading-spinner" style="margin:60px auto;display:block;"></div>
+            <p style="text-align:center;color:#888;">Carregando sua central...</p>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="modalBox">
+        <button class="close-modal" id="modalClose">&times;</button>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyB9GkSqTIZ0kbVsba_WOdQeVAETrF9qna0",
+    authDomain: "wzzm-ce3fc.firebaseapp.com",
+    projectId: "wzzm-ce3fc",
+    storageBucket: "wzzm-ce3fc.appspot.com",
+    messagingSenderId: "249427877153",
+    appId: "1:249427877153:web:0e4297294794a5aadeb260"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let currentUser = null;
+let userProfile = null;
+let isAdmin = false;
+let isBanned = false;
+let currentPage = 'dashboard';
+let allActions = [];
+let filteredActions = [];
+const ACTIONS_PER_PAGE = 20;
+let currentActionPage = 1;
+let totalActionPages = 1;
+
+// ============================================================
+// DOM REFS
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const userAvatar = $('userAvatar');
+const userName = $('userName');
+const userEmail = $('userEmail');
+const userBadge = $('userBadge');
+const btnLogout = $('btnLogout');
+const pageContainer = $('pageContainer');
+const modalOverlay = $('modalOverlay');
+const modalBox = $('modalBox');
+const modalContent = $('modalContent');
+const modalClose = $('modalClose');
+const bannedOverlay = $('bannedOverlay');
+const banDetails = $('banDetails');
+
+// ============================================================
+// FUNÇÕES DE UTILIDADE
+// ============================================================
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(ts) {
+    if (!ts) return '—';
+    if (ts.toDate) ts = ts.toDate();
+    return ts.toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
+
+function getInitials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+}
+
+function getPlatformIcon(platform) {
+    const icons = {
+        'academico': 'menu_book',
+        'jornal': 'newspaper',
+        'wiki': 'menu_book',
+        'support': 'support_agent',
+        'central': 'dashboard'
+    };
+    return icons[platform] || 'public';
+}
+
+function getPlatformBadgeClass(platform) {
+    const classes = {
+        'academico': 'academico',
+        'jornal': 'jornal',
+        'wiki': 'wiki',
+        'support': 'support',
+        'central': 'central'
+    };
+    return classes[platform] || '';
+}
+
+function getPlatformLabel(platform) {
+    const labels = {
+        'academico': 'Biblioteca Científica',
+        'jornal': 'Jornal',
+        'wiki': 'WikiZero',
+        'support': 'Help Desk',
+        'central': 'Central do Usuário'
+    };
+    return labels[platform] || platform;
+}
+
+function getActionBadgeClass(action) {
+    const classes = {
+        'create': 'create',
+        'update': 'update',
+        'delete': 'delete',
+        'view': 'view',
+        'login': 'login',
+        'logout': 'logout'
+    };
+    return classes[action] || '';
+}
+
+function getActionLabel(action) {
+    const labels = {
+        'create': 'Criação',
+        'update': 'Edição',
+        'delete': 'Exclusão',
+        'view': 'Visualização',
+        'login': 'Login',
+        'logout': 'Logout'
+    };
+    return labels[action] || action;
+}
+
+function showModal(html) {
+    modalContent.innerHTML = html;
+    modalOverlay.classList.add('show');
+}
+
+function hideModal() {
+    modalOverlay.classList.remove('show');
+}
+
+modalClose.addEventListener('click', hideModal);
+modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) hideModal();
+});
+
+// ============================================================
+// AUTENTICAÇÃO
+// ============================================================
+async function registerUser(user) {
+    try {
+        const uid = user.uid;
+        const userDoc = await db.collection('users').doc(uid).get();
+        const existingData = userDoc.exists ? userDoc.data() : {};
+        
+        const ADMIN_UIDS = ['sZxfMuOBPbXdR8nttVPXIN8QOOl1', '6aPqWVh8JVYL5NqEb78iDGPD7dH3'];
+        
+        const userData = {
+            uid: uid,
+            email: user.email || '',
+            name: user.displayName || 'Usuário',
+            profilePictureUrl: user.photoURL || '',
+            isAdmin: existingData.isAdmin || ADMIN_UIDS.includes(uid),
+            isBanned: existingData.isBanned || false,
+            isTeacher: existingData.isTeacher || false,
+            isTeatcher: existingData.isTeatcher || false,
+            createdAt: existingData.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('users').doc(uid).set(userData, { merge: true });
+        await db.collection('usuários').doc(uid).set(userData, { merge: true });
+
+        return userData;
+    } catch (error) {
+        console.error('Erro ao registrar usuário:', error);
+        return null;
+    }
+}
+
+async function checkIfUserIsBanned(user) {
+    if (!user) return false;
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            return userDoc.data().isBanned === true;
+        }
+    } catch (error) {
+        console.log("Erro ao verificar banimento:", error);
+    }
+    return false;
+}
+
+function showBannedScreen(reason = 'Violação das políticas de uso') {
+    banDetails.textContent = `Motivo: ${reason}`;
+    bannedOverlay.classList.add('show');
+    document.querySelector('.main-container').style.opacity = '0.3';
+    document.querySelector('.main-container').style.pointerEvents = 'none';
+    document.querySelector('.header').style.opacity = '0.3';
+    document.querySelector('.header').style.pointerEvents = 'none';
+}
+
+function logoutBanned() {
+    auth.signOut().then(() => location.reload());
+}
+
+async function loadUserProfile(uid) {
+    try {
+        const doc = await db.collection('users').doc(uid).get();
+        if (doc.exists) {
+            userProfile = doc.data();
+            isAdmin = userProfile.isAdmin === true;
+            isBanned = userProfile.isBanned === true;
+        } else {
+            userProfile = { displayName: currentUser.displayName || 'Usuário', email: currentUser.email };
+            isAdmin = false;
+            isBanned = false;
+        }
+    } catch (err) {
+        console.error('Erro ao carregar perfil:', err);
+    }
+}
+
+function updateUI() {
+    if (!currentUser) return;
+    
+    const name = currentUser.displayName || userProfile?.displayName || 'Usuário';
+    const email = currentUser.email || userProfile?.email || '';
+    
+    userAvatar.textContent = getInitials(name);
+    userName.textContent = name;
+    userEmail.textContent = email;
+    
+    let badges = '';
+    if (isBanned) badges += '<span class="badge-banned">🚫 Banido</span> ';
+    if (isAdmin) badges += '<span class="badge-admin">Admin</span> ';
+    userBadge.innerHTML = badges;
+    
+    const adminSection = document.getElementById('adminSection');
+    const adminDivider = document.getElementById('adminDivider');
+    if (isAdmin) {
+        adminSection.style.display = 'block';
+        adminDivider.style.display = 'block';
+    } else {
+        adminSection.style.display = 'none';
+        adminDivider.style.display = 'none';
+    }
+    
+    if (isBanned) {
+        showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
+    } else {
+        bannedOverlay.classList.remove('show');
+        document.querySelector('.main-container').style.opacity = '1';
+        document.querySelector('.main-container').style.pointerEvents = 'auto';
+        document.querySelector('.header').style.opacity = '1';
+        document.querySelector('.header').style.pointerEvents = 'auto';
+    }
+}
+
+btnLogout.addEventListener('click', async () => {
+    await auth.signOut();
+    window.location.href = 'login.html';
+});
+
+// ============================================================
+// NAVEGAÇÃO
+// ============================================================
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        if (!page) return;
+        if (isBanned && page !== 'dashboard') {
+            alert('Sua conta está banida. Acesso restrito.');
+            return;
+        }
+        navigateTo(page);
+    });
+});
+
+function navigateTo(page) {
+    currentPage = page;
+    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+    document.querySelector(`.sidebar-item[data-page="${page}"]`)?.classList.add('active');
+    renderPage(page);
+}
+
+async function renderPage(page) {
+    pageContainer.innerHTML = '<div class="loading-spinner" style="margin:60px auto;display:block;"></div><p style="text-align:center;color:#888;">Carregando...</p>';
+    
+    switch(page) {
+        case 'dashboard': await renderDashboard(); break;
+        case 'historico': await renderHistorico(); break;
+        case 'plataformas': await renderPlataformas(); break;
+        case 'admin-actions': if (isAdmin) await renderAdminActions(); else renderUnauthorized(); break;
+        default: pageContainer.innerHTML = '<h2>Página não encontrada</h2>';
+    }
+}
+
+function renderUnauthorized() {
+    pageContainer.innerHTML = `
+        <div class="empty-state">
+            <span class="material-icons">lock</span>
+            <h3>Acesso Negado</h3>
+            <p>Você não tem permissão para acessar esta página.</p>
+        </div>
+    `;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function renderDashboard() {
+    let totalActions = 0;
+    let actionsByPlatform = {};
+    let actionsByType = {};
+    
+    try {
+        const snap = await db.collection('user_actions')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
+            .get();
+        
+        totalActions = snap.size;
+        document.getElementById('actionCount').textContent = totalActions;
+        
+        snap.docs.forEach(doc => {
+            const data = doc.data();
+            const platform = data.platform || 'central';
+            const action = data.action || 'view';
+            
+            actionsByPlatform[platform] = (actionsByPlatform[platform] || 0) + 1;
+            actionsByType[action] = (actionsByType[action] || 0) + 1;
+        });
+    } catch (err) {
+        console.error('Erro ao carregar estatísticas:', err);
+    }
+    
+    const platformStats = Object.entries(actionsByPlatform).map(([key, value]) => ({
+        platform: key,
+        count: value,
+        label: getPlatformLabel(key),
+        icon: getPlatformIcon(key)
+    })).sort((a, b) => b.count - a.count);
+    
+    const actionStats = Object.entries(actionsByType).map(([key, value]) => ({
+        action: key,
+        count: value,
+        label: getActionLabel(key)
+    })).sort((a, b) => b.count - a.count);
+    
+    pageContainer.innerHTML = `
+        <div class="page active">
+            <h1 class="page-title">📊 Dashboard</h1>
+            <p class="page-subtitle">Visão geral das suas atividades</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="icon material-icons">history</span>
+                    <div class="number">${totalActions}</div>
+                    <div class="label">Total de Ações</div>
+                </div>
+                <div class="stat-card">
+                    <span class="icon material-icons">public</span>
+                    <div class="number">${platformStats.length}</div>
+                    <div class="label">Plataformas Acessadas</div>
+                </div>
+                <div class="stat-card">
+                    <span class="icon material-icons">category</span>
+                    <div class="number">${actionStats.length}</div>
+                    <div class="label">Tipos de Ação</div>
+                </div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px;">
+                <div>
+                    <h3 style="font-size:1em;font-weight:600;margin-bottom:12px;">📱 Por Plataforma</h3>
+                    ${platformStats.length === 0 ? '<p style="color:#999;">Nenhuma ação registrada.</p>' : 
+                        platformStats.map(p => `
+                            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                                <span><span class="material-icons" style="font-size:16px;vertical-align:middle;">${p.icon}</span> ${p.label}</span>
+                                <span style="font-weight:600;">${p.count}</span>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+                <div>
+                    <h3 style="font-size:1em;font-weight:600;margin-bottom:12px;">🏷️ Por Tipo de Ação</h3>
+                    ${actionStats.length === 0 ? '<p style="color:#999;">Nenhuma ação registrada.</p>' : 
+                        actionStats.map(a => `
+                            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                                <span><span class="action-badge ${getActionBadgeClass(a.action)}">${a.label}</span></span>
+                                <span style="font-weight:600;">${a.count}</span>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+            
+            <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="navigateTo('historico')">📜 Ver Histórico Completo</button>
+                <button class="btn btn-outline" onclick="navigateTo('plataformas')">🌐 Ver Plataformas</button>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// HISTÓRICO (Somente Leitura)
+// ============================================================
+async function renderHistorico() {
+    pageContainer.innerHTML = `
+        <div class="page active">
+            <h1 class="page-title">📜 Histórico de Ações</h1>
+            <p class="page-subtitle">Consulte todas as suas atividades registradas nas plataformas</p>
+            
+            <div class="filters">
+                <select id="filterPlatform">
+                    <option value="">Todas as Plataformas</option>
+                    <option value="academico">📚 Biblioteca Científica</option>
+                    <option value="jornal">📰 Jornal</option>
+                    <option value="wiki">📖 WikiZero</option>
+                    <option value="support">🎫 Help Desk</option>
+                    <option value="central">🏠 Central do Usuário</option>
+                </select>
+                <select id="filterAction">
+                    <option value="">Todos os Tipos</option>
+                    <option value="create">Criação</option>
+                    <option value="update">Edição</option>
+                    <option value="delete">Exclusão</option>
+                    <option value="view">Visualização</option>
+                    <option value="login">Login</option>
+                    <option value="logout">Logout</option>
+                </select>
+                <input type="text" id="filterSearch" placeholder="Buscar por descrição..." style="flex:1;min-width:150px;">
+                <button class="btn btn-primary btn-sm" onclick="applyFilters()">🔍 Filtrar</button>
+                <button class="btn btn-outline btn-sm" onclick="clearFilters()">Limpar</button>
+            </div>
+            
+            <div id="actionsList">
+                <div class="loading-spinner" style="margin:40px auto;display:block;"></div>
+            </div>
+            <div id="paginationContainer"></div>
+        </div>
+    `;
+    
+    await loadActions();
+}
+
+async function loadActions() {
+    const container = document.getElementById('actionsList');
+    
+    try {
+        const snap = await db.collection('user_actions')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
+            .get();
+        
+        allActions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        filteredActions = [...allActions];
+        document.getElementById('actionCount').textContent = allActions.length;
+        
+        applyFilters();
+    } catch (err) {
+        container.innerHTML = `<div class="empty-state">❌ Erro ao carregar: ${err.message}</div>`;
+    }
+}
+
+function applyFilters() {
+    const platform = document.getElementById('filterPlatform').value;
+    const action = document.getElementById('filterAction').value;
+    const search = document.getElementById('filterSearch').value.toLowerCase().trim();
+    
+    filteredActions = allActions.filter(a => {
+        if (platform && a.platform !== platform) return false;
+        if (action && a.action !== action) return false;
+        if (search && !(a.description || '').toLowerCase().includes(search)) return false;
+        return true;
+    });
+    
+    currentActionPage = 1;
+    renderActionsList();
+}
+
+function clearFilters() {
+    document.getElementById('filterPlatform').value = '';
+    document.getElementById('filterAction').value = '';
+    document.getElementById('filterSearch').value = '';
+    applyFilters();
+}
+
+function renderActionsList() {
+    const container = document.getElementById('actionsList');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    totalActionPages = Math.ceil(filteredActions.length / ACTIONS_PER_PAGE);
+    if (totalActionPages === 0) totalActionPages = 1;
+    if (currentActionPage > totalActionPages) currentActionPage = totalActionPages;
+    
+    const start = (currentActionPage - 1) * ACTIONS_PER_PAGE;
+    const end = start + ACTIONS_PER_PAGE;
+    const pageActions = filteredActions.slice(start, end);
+    
+    if (pageActions.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span class="material-icons">history</span>
+                <p>Nenhuma ação encontrada com os filtros aplicados.</p>
+            </div>
+        `;
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = pageActions.map(a => `
+        <div class="card" onclick="viewActionDetail('${a.id}')" style="cursor:pointer;">
+            <div class="card-header">
+                <span class="card-title">
+                    <span class="material-icons" style="font-size:18px;vertical-align:middle;">${getPlatformIcon(a.platform)}</span>
+                    ${escapeHtml(a.description || 'Ação registrada')}
+                </span>
+                <div>
+                    <span class="platform-badge ${getPlatformBadgeClass(a.platform)}">${getPlatformLabel(a.platform)}</span>
+                    <span class="action-badge ${getActionBadgeClass(a.action)}">${getActionLabel(a.action)}</span>
+                </div>
+            </div>
+            <div class="card-meta">
+                <span>📅 ${formatDate(a.timestamp)}</span>
+                ${a.targetId ? `<span>🎯 ID: ${escapeHtml(a.targetId.substring(0,8))}...</span>` : ''}
+                ${a.details ? `<span>📝 ${escapeHtml(a.details)}</span>` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    // Paginação
+    let paginationHTML = '<div class="pagination">';
+    
+    if (currentActionPage > 1) {
+        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(1)">«</button>`;
+        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${currentActionPage - 1})">‹</button>`;
+    }
+    
+    let startPage = Math.max(1, currentActionPage - 2);
+    let endPage = Math.min(totalActionPages, currentActionPage + 2);
+    
+    if (endPage - startPage < 4) {
+        if (startPage === 1) endPage = Math.min(totalActionPages, startPage + 4);
+        else if (endPage === totalActionPages) startPage = Math.max(1, endPage - 4);
+    }
+    
+    if (startPage > 1) paginationHTML += `<span class="pagination-dots">...</span>`;
+    
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === currentActionPage) {
+            paginationHTML += `<button class="pagination-btn active" disabled>${i}</button>`;
+        } else {
+            paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${i})">${i}</button>`;
+        }
+    }
+    
+    if (endPage < totalActionPages) paginationHTML += `<span class="pagination-dots">...</span>`;
+    
+    if (currentActionPage < totalActionPages) {
+        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${currentActionPage + 1})">›</button>`;
+        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${totalActionPages})">»</button>`;
+    }
+    
+    paginationHTML += `</div>`;
+    paginationHTML += `<div style="text-align:center;color:#888;font-size:0.85em;">
+        Mostrando ${start + 1} - ${Math.min(end, filteredActions.length)} de ${filteredActions.length} ações
+    </div>`;
+    
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+function goToActionPage(page) {
+    if (page < 1 || page > totalActionPages) return;
+    currentActionPage = page;
+    renderActionsList();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// DETALHE DA AÇÃO
+// ============================================================
+window.viewActionDetail = function(actionId) {
+    const action = allActions.find(a => a.id === actionId);
+    if (!action) return;
+    
+    showModal(`
+        <h2>📋 Detalhe da Ação</h2>
+        <div style="margin:16px 0;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div><strong>Plataforma:</strong><br><span class="platform-badge ${getPlatformBadgeClass(action.platform)}">${getPlatformLabel(action.platform)}</span></div>
+                <div><strong>Tipo:</strong><br><span class="action-badge ${getActionBadgeClass(action.action)}">${getActionLabel(action.action)}</span></div>
+                <div><strong>Data:</strong><br>${formatDate(action.timestamp)}</div>
+                <div><strong>Usuário:</strong><br>${escapeHtml(action.userName || 'Desconhecido')}</div>
+            </div>
+            <div style="margin-top:12px;padding:12px;background:#f8f9fc;border-radius:8px;">
+                <strong>Descrição:</strong><br>${escapeHtml(action.description || 'Sem descrição')}
+            </div>
+            ${action.details ? `
+                <div style="margin-top:12px;padding:12px;background:#f8f9fc;border-radius:8px;">
+                    <strong>Detalhes:</strong><br>${escapeHtml(action.details)}
+                </div>
+            ` : ''}
+            ${action.targetId ? `
+                <div style="margin-top:12px;font-size:0.85em;color:#888;">
+                    <strong>ID do Alvo:</strong> ${escapeHtml(action.targetId)}
+                </div>
+            ` : ''}
+            ${action.metadata ? `
+                <div style="margin-top:12px;font-size:0.85em;color:#888;">
+                    <strong>Metadados:</strong><br><pre style="background:#f4f4f4;padding:8px;border-radius:4px;font-size:0.8em;overflow-x:auto;">${escapeHtml(JSON.stringify(action.metadata, null, 2))}</pre>
+                </div>
+            ` : ''}
+        </div>
+        <button class="btn btn-outline" onclick="hideModal()">Fechar</button>
+    `);
+};
+
+// ============================================================
+// PLATAFORMAS
+// ============================================================
+async function renderPlataformas() {
+    const platforms = [
+        { id: 'academico', name: 'Biblioteca Científica', icon: 'menu_book', url: 'https://academico.wazzimagiygg.com', color: '#0d47a1' },
+        { id: 'jornal', name: 'Jornal WazzimaGiygg', icon: 'newspaper', url: 'https://jornal.wazzimagiygg.com', color: '#c62828' },
+        { id: 'wiki', name: 'WikiZero', icon: 'menu_book', url: 'https://wiki.wazzimagiygg.com', color: '#1b5e20' },
+        { id: 'support', name: 'Help Desk', icon: 'support_agent', url: 'https://support.wazzimagiygg.com', color: '#e65100' },
+        { id: 'central', name: 'Central do Usuário', icon: 'dashboard', url: '#', color: '#4a148c' }
+    ];
+    
+    // Contar ações por plataforma
+    let actionCounts = {};
+    try {
+        const snap = await db.collection('user_actions')
+            .where('userId', '==', currentUser.uid)
+            .get();
+        snap.docs.forEach(doc => {
+            const platform = doc.data().platform || 'central';
+            actionCounts[platform] = (actionCounts[platform] || 0) + 1;
+        });
+    } catch (err) { console.error(err); }
+    
+    pageContainer.innerHTML = `
+        <div class="page active">
+            <h1 class="page-title">🌐 Plataformas</h1>
+            <p class="page-subtitle">Acesse todas as plataformas do ecossistema WazzimaGiygg</p>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;">
+                ${platforms.map(p => `
+                    <div style="background:white;border-radius:16px;padding:24px;border:1px solid #eef2f7;transition:all 0.3s;cursor:pointer;" 
+                         onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)';"
+                         onmouseout="this.style.transform='none';this.style.boxShadow='none';"
+                         onclick="window.open('${p.url}','_blank')">
+                        <div style="font-size:2.5em;text-align:center;margin-bottom:12px;color:${p.color};">${p.icon}</div>
+                        <h3 style="text-align:center;font-size:1.1em;">${p.name}</h3>
+                        <div style="text-align:center;color:#888;font-size:0.85em;margin-top:8px;">
+                            ${actionCounts[p.id] || 0} ações registradas
+                        </div>
+                        <div style="text-align:center;margin-top:12px;">
+                            <span class="btn btn-sm btn-outline" onclick="event.stopPropagation();window.open('${p.url}','_blank')">Acessar →</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div style="margin-top:24px;padding:16px;background:#f8f9fc;border-radius:12px;">
+                <p style="color:#888;font-size:0.85em;text-align:center;">
+                    <span class="material-icons" style="font-size:16px;vertical-align:middle;">info</span>
+                    Todas as suas ações são registradas e podem ser consultadas no <a href="#" onclick="navigateTo('historico')" style="color:#4a6cf7;">Histórico</a>.
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// ADMIN: TODAS AS AÇÕES
+// ============================================================
+async function renderAdminActions() {
+    if (!isAdmin) { renderUnauthorized(); return; }
+    
+    pageContainer.innerHTML = `
+        <div class="page active">
+            <h1 class="page-title">📊 Todas as Ações (Admin)</h1>
+            <p class="page-subtitle">Visualize todas as ações de todos os usuários</p>
+            
+            <div class="filters">
+                <input type="text" id="adminFilterUser" placeholder="ID do Usuário..." style="flex:1;min-width:150px;">
+                <select id="adminFilterPlatform">
+                    <option value="">Todas as Plataformas</option>
+                    <option value="academico">📚 Biblioteca Científica</option>
+                    <option value="jornal">📰 Jornal</option>
+                    <option value="wiki">📖 WikiZero</option>
+                    <option value="support">🎫 Help Desk</option>
+                    <option value="central">🏠 Central do Usuário</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="applyAdminFilters()">🔍 Filtrar</button>
+                <button class="btn btn-outline btn-sm" onclick="clearAdminFilters()">Limpar</button>
+            </div>
+            
+            <div id="adminActionsList">
+                <div class="loading-spinner" style="margin:40px auto;display:block;"></div>
+            </div>
+            <div id="adminPaginationContainer"></div>
+        </div>
+    `;
+    
+    await loadAdminActions();
+}
+
+let allAdminActions = [];
+let filteredAdminActions = [];
+let adminActionPage = 1;
+let totalAdminPages = 1;
+
+async function loadAdminActions() {
+    const container = document.getElementById('adminActionsList');
+    
+    try {
+        const snap = await db.collection('user_actions')
+            .orderBy('timestamp', 'desc')
+            .limit(500)
+            .get();
+        
+        allAdminActions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        filteredAdminActions = [...allAdminActions];
+        applyAdminFilters();
+    } catch (err) {
+        container.innerHTML = `<div class="empty-state">❌ Erro: ${err.message}</div>`;
+    }
+}
+
+function applyAdminFilters() {
+    const userId = document.getElementById('adminFilterUser').value.toLowerCase().trim();
+    const platform = document.getElementById('adminFilterPlatform').value;
+    
+    filteredAdminActions = allAdminActions.filter(a => {
+        if (userId && !(a.userId || '').toLowerCase().includes(userId)) return false;
+        if (platform && a.platform !== platform) return false;
+        return true;
+    });
+    
+    adminActionPage = 1;
+    renderAdminActionsList();
+}
+
+function clearAdminFilters() {
+    document.getElementById('adminFilterUser').value = '';
+    document.getElementById('adminFilterPlatform').value = '';
+    applyAdminFilters();
+}
+
+function renderAdminActionsList() {
+    const container = document.getElementById('adminActionsList');
+    const paginationContainer = document.getElementById('adminPaginationContainer');
+    
+    totalAdminPages = Math.ceil(filteredAdminActions.length / ACTIONS_PER_PAGE);
+    if (totalAdminPages === 0) totalAdminPages = 1;
+    if (adminActionPage > totalAdminPages) adminActionPage = totalAdminPages;
+    
+    const start = (adminActionPage - 1) * ACTIONS_PER_PAGE;
+    const end = start + ACTIONS_PER_PAGE;
+    const pageActions = filteredAdminActions.slice(start, end);
+    
+    if (pageActions.length === 0) {
+        container.innerHTML = `<div class="empty-state"><span class="material-icons">fact_check</span><p>Nenhuma ação encontrada.</p></div>`;
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Usuário</th>
+                        <th>Plataforma</th>
+                        <th>Ação</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${pageActions.map(a => `
+                        <tr onclick="viewActionDetail('${a.id}')" style="cursor:pointer;">
+                            <td>${formatDate(a.timestamp)}</td>
+                            <td><code style="font-size:0.8em;">${escapeHtml(a.userId?.substring(0,10) || '---')}</code></td>
+                            <td><span class="platform-badge ${getPlatformBadgeClass(a.platform)}">${getPlatformLabel(a.platform)}</span></td>
+                            <td><span class="action-badge ${getActionBadgeClass(a.action)}">${getActionLabel(a.action)}</span></td>
+                            <td>${escapeHtml(a.description?.substring(0,50) || '---')}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    // Paginação
+    let paginationHTML = '<div class="pagination">';
+    if (adminActionPage > 1) {
+        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(1)">«</button>`;
+        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${adminActionPage - 1})">‹</button>`;
+    }
+    
+    let startPage = Math.max(1, adminActionPage - 2);
+    let endPage = Math.min(totalAdminPages, adminActionPage + 2);
+    if (endPage - startPage < 4) {
+        if (startPage === 1) endPage = Math.min(totalAdminPages, startPage + 4);
+        else if (endPage === totalAdminPages) startPage = Math.max(1, endPage - 4);
+    }
+    
+    if (startPage > 1) paginationHTML += `<span class="pagination-dots">...</span>`;
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === adminActionPage) {
+            paginationHTML += `<button class="pagination-btn active" disabled>${i}</button>`;
+        } else {
+            paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${i})">${i}</button>`;
+        }
+    }
+    if (endPage < totalAdminPages) paginationHTML += `<span class="pagination-dots">...</span>`;
+    
+    if (adminActionPage < totalAdminPages) {
+        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${adminActionPage + 1})">›</button>`;
+        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${totalAdminPages})">»</button>`;
+    }
+    paginationHTML += `</div>`;
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+function goToAdminPage(page) {
+    if (page < 1 || page > totalAdminPages) return;
+    adminActionPage = page;
+    renderAdminActionsList();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        await registerUser(user);
+        await loadUserProfile(user.uid);
+        
+        if (isBanned) {
+            updateUI();
+            navigateTo('dashboard');
+            return;
+        }
+        
+        updateUI();
+        navigateTo('dashboard');
+    } else {
+        currentUser = null;
+        isBanned = false;
+        updateUI();
+        window.location.href = 'login.html';
+    }
+});
+
+console.log('🚀 Central do Usuário WazzimaGiygg - Versão Histórico (Somente Leitura)');
+console.log('📌 Ações integradas das plataformas: acadêmico, jornal, wiki, support');
+</script>
+</body>
+</html>
