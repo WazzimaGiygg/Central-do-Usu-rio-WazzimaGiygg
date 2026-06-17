@@ -1013,10 +1013,39 @@ function updateUI() {
     }
 }
 
+// ============================================================
+// LOGOUT CORRIGIDO
+// ============================================================
 btnLogout.addEventListener('click', async () => {
-    await registerUserAction('central', 'logout', 'Usuário saiu da central');
-    await auth.signOut();
-    window.location.href = 'login.html';
+    try {
+        // Tenta registrar a ação de logout (se falhar, continua)
+        try {
+            await registerUserAction('central', 'logout', 'Usuário saiu da central');
+        } catch (e) {
+            console.log('Erro ao registrar logout:', e);
+        }
+        
+        // Limpa dados do usuário
+        currentUser = null;
+        userProfile = null;
+        isAdmin = false;
+        isBanned = false;
+        
+        // Limpa localStorage
+        localStorage.removeItem('wzzm_guest_user');
+        localStorage.removeItem('wzzm_guest_expiry');
+        
+        // Faz logout do Firebase
+        await auth.signOut();
+        
+        // Redireciona para a página de login
+        window.location.href = 'login.html';
+        
+    } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        // Se falhar, tenta redirecionar diretamente
+        window.location.href = 'login.html';
+    }
 });
 
 // ============================================================
@@ -2332,28 +2361,49 @@ window.requestDataDeletion = function() {
 };
 
 // ============================================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO CORRIGIDA
 // ============================================================
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        currentUser = user;
-        await registerUser(user);
-        await loadUserProfile(user.uid);
-        
-        // Registra ação de login
-        await registerUserAction('central', 'login', 'Usuário acessou a central', 'Login realizado');
-        
-        if (isBanned) {
+        try {
+            currentUser = user;
+            await registerUser(user);
+            await loadUserProfile(user.uid);
+            
+            // Registra ação de login
+            await registerUserAction('central', 'login', 'Usuário acessou a central', 'Login realizado');
+            
+            if (isBanned) {
+                updateUI();
+                navigateTo('dashboard');
+                return;
+            }
+            
             updateUI();
             navigateTo('dashboard');
-            return;
+        } catch (error) {
+            console.error('Erro ao inicializar usuário:', error);
+            // Se falhar, tenta fazer logout
+            await auth.signOut();
+            window.location.href = 'login.html';
         }
-        
-        updateUI();
-        navigateTo('dashboard');
     } else {
+        // Usuário não autenticado
         currentUser = null;
         isBanned = false;
+        
+        // Verifica se há convidado
+        const guestExpiry = localStorage.getItem('wzzm_guest_expiry');
+        if (guestExpiry && Date.now() < parseInt(guestExpiry)) {
+            const guestUser = localStorage.getItem('wzzm_guest_user');
+            if (guestUser) {
+                currentUser = JSON.parse(guestUser);
+                updateUI();
+                navigateTo('dashboard');
+                return;
+            }
+        }
+        
         updateUI();
         window.location.href = 'login.html';
     }
