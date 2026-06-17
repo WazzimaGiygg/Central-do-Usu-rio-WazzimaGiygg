@@ -766,7 +766,7 @@ modalOverlay.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// AUTENTICAÇÃO
+// AUTENTICAÇÃO - CORRIGIDA
 // ============================================================
 async function registerUser(user) {
     try {
@@ -816,14 +816,38 @@ async function checkIfUserIsBanned(user) {
 function showBannedScreen(reason = 'Violação das políticas de uso') {
     banDetails.textContent = `Motivo: ${reason}`;
     bannedOverlay.classList.add('show');
+    // Desabilita interações, mas permite o logout
     document.querySelector('.main-container').style.opacity = '0.3';
     document.querySelector('.main-container').style.pointerEvents = 'none';
     document.querySelector('.header').style.opacity = '0.3';
     document.querySelector('.header').style.pointerEvents = 'none';
 }
 
-function logoutBanned() {
-    auth.signOut().then(() => location.reload());
+async function logoutBanned() {
+    try {
+        // Desabilita o botão para evitar múltiplos cliques
+        const btn = document.querySelector('.btn-logout-banned');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saindo...';
+        }
+        
+        await auth.signOut();
+        // Pequeno delay para garantir que o logout foi processado
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 100);
+    } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        // Fallback: tenta novamente
+        try {
+            await auth.signOut();
+            window.location.href = 'login.html';
+        } catch (e) {
+            // Último recurso: redirecionamento forçado
+            window.location.href = 'login.html';
+        }
+    }
 }
 
 async function loadUserProfile(uid) {
@@ -879,9 +903,62 @@ function updateUI() {
     }
 }
 
-btnLogout.addEventListener('click', async () => {
-    await auth.signOut();
-    window.location.href = 'login.html';
+// CORREÇÃO: Event listener do logout
+btnLogout.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+        // Se estiver banido, usa a função específica
+        if (isBanned) {
+            await logoutBanned();
+            return;
+        }
+        // Logout normal
+        await auth.signOut();
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Erro no logout:', error);
+        // Fallback: força o logout
+        await auth.signOut();
+        window.location.href = 'login.html';
+    }
+});
+
+// ============================================================
+// INICIALIZAÇÃO - CORRIGIDA
+// ============================================================
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        await registerUser(user);
+        await loadUserProfile(user.uid);
+        
+        // Atualiza a UI (mostra tela de banimento se necessário)
+        updateUI();
+        
+        // Se estiver banido, não carrega o dashboard
+        if (isBanned) {
+            // Mostra a tela de banimento
+            showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
+            // Não carrega nenhuma página
+            pageContainer.innerHTML = `
+                <div style="text-align:center;padding:40px 20px;color:#666;">
+                    <span class="material-icons" style="font-size:48px;">lock</span>
+                    <h3>Acesso Restrito</h3>
+                    <p>Sua conta foi banida. Entre em contato com o suporte.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Carrega o dashboard para usuários não banidos
+        navigateTo('dashboard');
+    } else {
+        // Usuário não está logado
+        currentUser = null;
+        isBanned = false;
+        // Redireciona para login
+        window.location.href = 'login.html';
+    }
 });
 
 // ============================================================
@@ -1480,7 +1557,16 @@ auth.onAuthStateChanged(async (user) => {
         isBanned = false;
         updateUI();
         window.location.href = 'login.html';
+    // No final do onAuthStateChanged, quando o usuário não está logado
+} else {
+    currentUser = null;
+    isBanned = false;
+    // Verifica se já não está na página de login para evitar loop
+    if (!window.location.pathname.includes('login.html')) {
+        window.location.href = 'login.html';
     }
+}
+    
 });
 
 console.log('🚀 Central do Usuário WazzimaGiygg - Versão Histórico (Somente Leitura)');
