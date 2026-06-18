@@ -119,7 +119,7 @@
             text-transform: uppercase;
         }
 
-        /* LOGIN OVERLAY (na mesma página) */
+        /* LOGIN OVERLAY */
         .login-overlay {
             position: fixed;
             top: 0;
@@ -349,372 +349,346 @@
             color: #888;
         }
 
-        /* MAIN LAYOUT */
+        /* MAIN CONTENT - CENTRALIZADO */
         .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px 24px;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 24px;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        /* SIDEBAR */
-        .sidebar {
+        .profile-card {
             background: white;
-            border-radius: 16px;
-            padding: 16px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            height: fit-content;
-            position: sticky;
-            top: 90px;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-        .sidebar-title {
-            padding: 0 16px 12px;
-            font-size: 0.7em;
-            text-transform: uppercase;
-            color: #888;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-        .sidebar-item {
+
+        .profile-header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: all 0.15s;
-            border-left: 3px solid transparent;
-            color: #444;
-            text-decoration: none;
-            font-size: 0.9em;
+            gap: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
         }
-        .sidebar-item:hover {
-            background: #f5f6fa;
-            color: #1a1a2e;
-        }
-        .sidebar-item.active {
-            background: #eef2ff;
-            border-left-color: #4a6cf7;
-            color: #4a6cf7;
-            font-weight: 500;
-        }
-        .sidebar-item .material-icons {
-            font-size: 22px;
-            width: 28px;
-            text-align: center;
-        }
-        .sidebar-divider {
-            height: 1px;
-            background: #eee;
-            margin: 8px 16px;
-        }
-        .sidebar-badge {
-            margin-left: auto;
-            background: #4a6cf7;
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
             color: white;
-            font-size: 0.65em;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-weight: 500;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        /* CONTENT */
-        .content-area {
-            background: white;
-            border-radius: 16px;
-            padding: 24px 28px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            min-height: 500px;
-        }
-        .page-title {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #1a1a2e;
-        }
-        .page-subtitle {
-            color: #888;
-            font-size: 0.9em;
-            margin-bottom: 24px;
-        }
-        .page { display: none; animation: fadeIn 0.25s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* STATS GRID */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: #f8f9fc;
-            border-radius: 12px;
-            padding: 16px 20px;
-            border: 1px solid #eef2f7;
-        }
-        .stat-card .number {
-            font-size: 1.8em;
+        .profile-name-area h2 {
+            font-size: 28px;
             font-weight: 700;
             color: #1a1a2e;
         }
-        .stat-card .label {
-            font-size: 0.8em;
+        .profile-name-area .email {
+            color: #888;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+        .profile-name-area .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .badge-admin {
+            background: #e94560;
+            color: white;
+        }
+        .badge-user {
+            background: #27ae60;
+            color: white;
+        }
+        .badge-banned {
+            background: #dc3545;
+            color: white;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-item {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #eef2f7;
+        }
+        .stat-item .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .stat-item .label {
+            font-size: 13px;
             color: #888;
             margin-top: 4px;
         }
-        .stat-card .icon {
-            float: right;
-            font-size: 2em;
-            color: #4a6cf7;
-            opacity: 0.3;
+
+        .profile-info {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
         }
 
-        /* TABLES */
-        .table-container { overflow-x: auto; margin-top: 16px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        th {
-            text-align: left;
-            padding: 12px 14px;
-            background: #f8f9fc;
+        .info-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-row .label {
+            width: 120px;
             font-weight: 600;
-            color: #555;
-            border-bottom: 2px solid #eef2f7;
-        }
-        td { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; }
-        tr:hover td { background: #fafbfd; }
-
-        /* FILTERS */
-        .filters {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding: 16px;
-            background: #f8f9fc;
-            border-radius: 12px;
-        }
-        .filters select, .filters input {
-            padding: 8px 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.9em;
-            background: white;
-        }
-        .filters select:focus, .filters input:focus {
-            outline: none;
-            border-color: #4a6cf7;
-        }
-
-        /* CARDS */
-        .card {
-            border: 1px solid #eef2f7;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-        }
-        .card:hover {
-            border-color: #4a6cf7;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .card-title {
-            font-weight: 600;
-            font-size: 1em;
-        }
-        .card-meta {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: 8px;
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .platform-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 500;
-        }
-        .platform-badge.academico { background: #e3f2fd; color: #0d47a1; }
-        .platform-badge.jornal { background: #fce4ec; color: #c62828; }
-        .platform-badge.wiki { background: #e8f5e9; color: #1b5e20; }
-        .platform-badge.support { background: #fff3e0; color: #e65100; }
-        .platform-badge.central { background: #f3e5f5; color: #4a148c; }
-
-        .action-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 500;
-        }
-        .action-badge.create { background: #d4edda; color: #155724; }
-        .action-badge.update { background: #cce5ff; color: #004085; }
-        .action-badge.delete { background: #f8d7da; color: #721c24; }
-        .action-badge.view { background: #e2e3e5; color: #383d41; }
-        .action-badge.login { background: #d1ecf1; color: #0c5460; }
-        .action-badge.logout { background: #f5c6cb; color: #721c24; }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        .pagination-btn {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.2s;
-            color: #333;
-        }
-        .pagination-btn:hover:not(:disabled) {
-            background: #4a6cf7;
-            color: white;
-            border-color: #4a6cf7;
-        }
-        .pagination-btn.active {
-            background: #4a6cf7;
-            color: white;
-            border-color: #4a6cf7;
-            cursor: default;
-        }
-        .pagination-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .pagination-dots {
-            padding: 8px 4px;
             color: #666;
+            flex-shrink: 0;
+        }
+        .info-row .value {
+            color: #1a1a2e;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .info-row .value.email-value {
+            font-family: inherit;
         }
 
-        .empty-state {
+        .notifications-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .notifications-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: #f8f9fc;
+            border-left: 3px solid transparent;
+            transition: background 0.2s;
+        }
+        .notif-item:hover {
+            background: #f0f2f5;
+        }
+        .notif-item.unread {
+            background: #eef2ff;
+            border-left-color: #4a6cf7;
+        }
+        .notif-item .notif-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .notif-item .notif-message {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .notif-item .notif-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .notif-empty {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px;
             color: #999;
         }
-        .empty-state .material-icons {
+        .notif-empty .material-icons {
             font-size: 48px;
             opacity: 0.4;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
+        }
+
+        .btn-mark-read {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+        .btn-mark-read:hover {
+            background: #3a5cd7;
+        }
+
+        .btn-mark-all {
+            background: none;
+            border: none;
+            color: #4a6cf7;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 4px 8px;
+        }
+        .btn-mark-all:hover {
+            text-decoration: underline;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: #4a6cf7;
+            color: white;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.3);
+        }
+        .btn-secondary {
+            background: #e8e8e8;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #ddd;
         }
 
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 3px solid #f0f0f0;
             border-top-color: #4a6cf7;
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
+            margin: 20px auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* MODAL */
-        .modal-overlay {
-            display: none;
+        /* Toast */
+        .toast {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: fadeInOut 3s ease;
         }
-        .modal-overlay.show { display: flex; }
-        .modal-box {
-            background: white;
-            border-radius: 16px;
-            max-width: 700px;
-            width: 92%;
-            padding: 28px;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: fadeIn 0.2s ease;
-        }
-        .modal-box h2 { font-size: 1.3em; margin-bottom: 6px; }
-        .modal-box .close-modal {
-            float: right;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #999;
-        }
-        .modal-box .close-modal:hover { color: #333; }
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #dc3545; }
+        .toast-info { background: #4a6cf7; }
 
-        @media (max-width: 900px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                padding: 12px 16px;
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
             }
-            .sidebar {
-                position: static;
-                display: flex;
-                flex-wrap: wrap;
+            .info-row {
+                flex-direction: column;
                 gap: 4px;
-                padding: 10px 12px;
             }
-            .sidebar-title { display: none; }
-            .sidebar-item {
-                padding: 8px 14px;
-                border-left: none;
-                border-radius: 8px;
-                font-size: 0.8em;
-                background: #f5f6fa;
+            .info-row .label {
+                width: 100%;
             }
-            .sidebar-item .material-icons { font-size: 18px; width: 22px; }
-            .sidebar-item.active {
-                background: #4a6cf7;
-                color: white;
+            .profile-stats {
+                grid-template-columns: 1fr 1fr;
             }
-            .sidebar-divider { display: none; }
-            .sidebar-badge { display: none; }
+            .login-card {
+                padding: 32px 24px;
+            }
             .header-content {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 8px;
             }
-            .user-info { justify-content: space-between; }
-            .content-area { padding: 16px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .filters { flex-direction: column; }
+            .user-info {
+                justify-content: space-between;
+            }
             .notification-dropdown {
                 width: 300px;
                 right: -20px;
             }
         }
         @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .user-name, .user-email { display: none; }
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+            .profile-card {
+                padding: 24px 16px;
+            }
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
             .notification-dropdown {
                 width: calc(100vw - 40px);
                 right: -10px;
-            }
-            .login-card {
-                padding: 32px 24px;
             }
         }
     </style>
@@ -732,12 +706,12 @@
     </div>
 </div>
 
-<!-- LOGIN OVERLAY (NA MESMA PÁGINA) -->
+<!-- LOGIN OVERLAY -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
         <div class="logo-big">🔐</div>
         <h2>Central do Usuário</h2>
-        <p>Faça login para acessar suas informações, histórico e notificações.</p>
+        <p>Faça login para acessar suas informações e notificações.</p>
         
         <button id="googleLoginBtn" class="btn-google-login">
             <svg viewBox="0 0 48 48" style="width:24px;height:24px;">
@@ -756,7 +730,7 @@
 <!-- HEADER -->
 <header class="header">
     <div class="header-content">
-        <div class="logo-area" onclick="navigateTo('dashboard')">
+        <div class="logo-area" onclick="location.reload()">
             <img src="https://wazzimagiygg.com/favicom.png" alt="Logo">
             <div>
                 <h1>Central do Usuário</h1>
@@ -794,56 +768,11 @@
     </div>
 </header>
 
-<!-- MAIN -->
-<div class="main-container">
-    <!-- SIDEBAR -->
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-title">Menu</div>
-        
-        <a class="sidebar-item active" data-page="dashboard">
-            <span class="material-icons">dashboard</span> Dashboard
-        </a>
-        <a class="sidebar-item" data-page="perfil">
-            <span class="material-icons">person</span> Meu Perfil
-        </a>
-        <a class="sidebar-item" data-page="historico">
-            <span class="material-icons">history</span> Histórico
-            <span class="sidebar-badge" id="actionCount">0</span>
-        </a>
-        <a class="sidebar-item" data-page="notificacoes">
-            <span class="material-icons">notifications</span> Notificações
-            <span class="sidebar-badge" id="notifMenuBadge" style="background:#e94560; display:none;">0</span>
-        </a>
-        
-        <div class="sidebar-divider"></div>
-        
-        <a class="sidebar-item" data-page="plataformas">
-            <span class="material-icons">public</span> Plataformas
-        </a>
-        
-        <div class="sidebar-divider" id="adminDivider" style="display:none;"></div>
-        <div id="adminSection" style="display:none;">
-            <div class="sidebar-title">Administração</div>
-            <a class="sidebar-item" data-page="admin-actions">
-                <span class="material-icons">fact_check</span> Todas as Ações
-            </a>
-        </div>
-    </nav>
-
-    <!-- CONTENT -->
-    <main class="content-area" id="contentArea">
-        <div id="pageContainer">
-            <div class="loading-spinner" style="margin:60px auto;display:block;"></div>
-            <p style="text-align:center;color:#888;">Carregando sua central...</p>
-        </div>
-    </main>
-</div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-box" id="modalBox">
-        <button class="close-modal" id="modalClose">&times;</button>
-        <div id="modalContent"></div>
+<!-- MAIN CONTENT -->
+<div class="main-container" id="mainContainer">
+    <div id="profileContent">
+        <div class="loading-spinner" style="display:block;margin:60px auto;"></div>
+        <p style="text-align:center;color:#888;">Carregando seu perfil...</p>
     </div>
 </div>
 
@@ -871,14 +800,6 @@ let currentUser = null;
 let userProfile = null;
 let isAdmin = false;
 let isBanned = false;
-let currentPage = 'dashboard';
-let allActions = [];
-let filteredActions = [];
-const ACTIONS_PER_PAGE = 20;
-let currentActionPage = 1;
-let totalActionPages = 1;
-
-// NOTIFICAÇÕES
 let notifications = [];
 let unreadCount = 0;
 let notificationListener = null;
@@ -892,19 +813,15 @@ const userName = $('userName');
 const userEmail = $('userEmail');
 const userBadge = $('userBadge');
 const btnLogout = $('btnLogout');
-const pageContainer = $('pageContainer');
-const modalOverlay = $('modalOverlay');
-const modalBox = $('modalBox');
-const modalContent = $('modalContent');
-const modalClose = $('modalClose');
-const bannedOverlay = $('bannedOverlay');
-const banDetails = $('banDetails');
-const notifBadge = $('notifBadge');
-const notifDropdown = $('notifDropdown');
-const notificationList = $('notificationList');
+const profileContent = $('profileContent');
 const loginOverlay = $('loginOverlay');
 const loginError = $('loginError');
 const googleLoginBtn = $('googleLoginBtn');
+const notifBadge = $('notifBadge');
+const notifDropdown = $('notifDropdown');
+const notificationList = $('notificationList');
+const bannedOverlay = $('bannedOverlay');
+const banDetails = $('banDetails');
 
 // ============================================================
 // FUNÇÕES DE UTILIDADE
@@ -914,18 +831,6 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-}
-
-function formatDate(ts) {
-    if (!ts) return '—';
-    if (ts.toDate) ts = ts.toDate();
-    return ts.toLocaleDateString('pt-BR', { 
-        day: '2-digit', 
-        month: 'short', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    });
 }
 
 function getTimeAgo(date) {
@@ -948,76 +853,31 @@ function getInitials(name) {
     return name.substring(0, 2).toUpperCase();
 }
 
-function getPlatformIcon(platform) {
-    const icons = {
-        'academico': 'menu_book',
-        'jornal': 'newspaper',
-        'wiki': 'menu_book',
-        'support': 'support_agent',
-        'central': 'dashboard'
-    };
-    return icons[platform] || 'public';
+function getTimeAgo(date) {
+    if (!date) return '';
+    if (date.toDate) date = date.toDate();
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return 'agora';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `${days}d`;
 }
 
-function getPlatformBadgeClass(platform) {
-    const classes = {
-        'academico': 'academico',
-        'jornal': 'jornal',
-        'wiki': 'wiki',
-        'support': 'support',
-        'central': 'central'
-    };
-    return classes[platform] || '';
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
 }
-
-function getPlatformLabel(platform) {
-    const labels = {
-        'academico': 'Biblioteca Científica',
-        'jornal': 'Jornal',
-        'wiki': 'WikiZero',
-        'support': 'Help Desk',
-        'central': 'Central do Usuário'
-    };
-    return labels[platform] || platform;
-}
-
-function getActionBadgeClass(action) {
-    const classes = {
-        'create': 'create',
-        'update': 'update',
-        'delete': 'delete',
-        'view': 'view',
-        'login': 'login',
-        'logout': 'logout'
-    };
-    return classes[action] || '';
-}
-
-function getActionLabel(action) {
-    const labels = {
-        'create': 'Criação',
-        'update': 'Edição',
-        'delete': 'Exclusão',
-        'view': 'Visualização',
-        'login': 'Login',
-        'logout': 'Logout'
-    };
-    return labels[action] || action;
-}
-
-function showModal(html) {
-    modalContent.innerHTML = html;
-    modalOverlay.classList.add('show');
-}
-
-function hideModal() {
-    modalOverlay.classList.remove('show');
-}
-
-modalClose.addEventListener('click', hideModal);
-modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) hideModal();
-});
 
 // ============================================================
 // NOTIFICAÇÕES
@@ -1041,6 +901,7 @@ async function loadNotifications() {
         unreadCount = notifications.filter(n => !n.lida).length;
         updateNotificationBadge();
         renderNotifications();
+        renderProfile();
         
     } catch (error) {
         console.error('Erro ao carregar notificações:', error);
@@ -1051,18 +912,8 @@ function updateNotificationBadge() {
     if (unreadCount > 0) {
         notifBadge.style.display = 'flex';
         notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-        
-        const menuBadge = document.getElementById('notifMenuBadge');
-        if (menuBadge) {
-            menuBadge.textContent = unreadCount;
-            menuBadge.style.display = 'inline';
-        }
     } else {
         notifBadge.style.display = 'none';
-        const menuBadge = document.getElementById('notifMenuBadge');
-        if (menuBadge) {
-            menuBadge.style.display = 'none';
-        }
     }
 }
 
@@ -1098,10 +949,7 @@ async function markAsRead(notificationId) {
             unreadCount--;
             updateNotificationBadge();
             renderNotifications();
-            
-            if (currentPage === 'notificacoes') {
-                renderNotificacoes();
-            }
+            renderProfile();
         }
     } catch (error) {
         console.error('Erro ao marcar como lida:', error);
@@ -1128,16 +976,13 @@ async function markAllAsRead(event) {
         unreadCount = 0;
         updateNotificationBadge();
         renderNotifications();
+        renderProfile();
         
-        if (currentPage === 'notificacoes') {
-            renderNotificacoes();
-        }
-        
-        showToast('✅ Todas as notificações marcadas como lidas!');
+        showToast('✅ Todas as notificações marcadas como lidas!', 'success');
         
     } catch (error) {
         console.error('Erro ao marcar todas como lidas:', error);
-        showToast('❌ Erro ao marcar como lidas', true);
+        showToast('❌ Erro ao marcar como lidas', 'error');
     }
 }
 
@@ -1173,20 +1018,16 @@ function listenNotifications() {
             unreadCount = notifications.filter(n => !n.lida).length;
             updateNotificationBadge();
             renderNotifications();
-            
-            if (currentPage === 'notificacoes') {
-                renderNotificacoes();
-            }
+            renderProfile();
         }, (error) => {
             console.error('Erro no listener de notificações:', error);
         });
 }
 
 // ============================================================
-// AUTENTICAÇÃO - LOGIN NA MESMA PÁGINA
+// AUTENTICAÇÃO
 // ============================================================
 
-// Login com Google (na mesma página)
 async function loginWithGoogle() {
     try {
         googleLoginBtn.disabled = true;
@@ -1197,7 +1038,6 @@ async function loginWithGoogle() {
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await auth.signInWithPopup(provider);
         
-        // Login bem-sucedido - o onAuthStateChanged vai tratar
         console.log('✅ Login realizado com sucesso!');
         
     } catch (error) {
@@ -1314,16 +1154,6 @@ function updateUI() {
     if (isAdmin) badges += '<span class="badge-admin">Admin</span> ';
     userBadge.innerHTML = badges;
     
-    const adminSection = document.getElementById('adminSection');
-    const adminDivider = document.getElementById('adminDivider');
-    if (isAdmin) {
-        adminSection.style.display = 'block';
-        adminDivider.style.display = 'block';
-    } else {
-        adminSection.style.display = 'none';
-        adminDivider.style.display = 'none';
-    }
-    
     if (isBanned) {
         showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
     } else {
@@ -1343,7 +1173,6 @@ btnLogout.addEventListener('click', async (e) => {
             return;
         }
         await auth.signOut();
-        // O onAuthStateChanged vai mostrar o login novamente
     } catch (error) {
         console.error('Erro no logout:', error);
         await auth.signOut();
@@ -1351,13 +1180,121 @@ btnLogout.addEventListener('click', async (e) => {
 });
 
 // ============================================================
-// INICIALIZAÇÃO - VERIFICA SESSÃO E MOSTRA LOGIN NA MESMA PÁGINA
+// RENDERIZAR PERFIL
+// ============================================================
+
+function renderProfile() {
+    if (!currentUser) return;
+    
+    const name = currentUser.displayName || 'Usuário';
+    const email = currentUser.email || 'Email não informado';
+    const uid = currentUser.uid;
+    const photoURL = currentUser.photoURL;
+    const avatarInitials = getInitials(name);
+    
+    const unread = notifications.filter(n => !n.lida).length;
+    
+    // Notificações para exibir na página
+    const notifsHtml = notifications.length === 0 ? `
+        <div class="notif-empty">
+            <span class="material-icons">notifications_off</span>
+            <p>Nenhuma notificação</p>
+        </div>
+    ` : notifications.map(notif => `
+        <div class="notif-item ${notif.lida ? '' : 'unread'}">
+            <div class="notif-title">${escapeHtml(notif.titulo || 'Notificação')}</div>
+            <div class="notif-message">${escapeHtml(notif.mensagem || '')}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;">
+                <span class="notif-time">${getTimeAgo(notif.timestamp)}</span>
+                ${!notif.lida ? `<button class="btn-mark-read" onclick="markAsRead('${notif.id}')">Marcar como lida</button>` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    profileContent.innerHTML = `
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    ${photoURL ? `<img src="${photoURL}" alt="${name}">` : avatarInitials}
+                </div>
+                <div class="profile-name-area">
+                    <h2>${escapeHtml(name)}</h2>
+                    <div class="email">${escapeHtml(email)}</div>
+                    <div>
+                        ${isAdmin ? '<span class="badge badge-admin">👑 Administrador</span>' : '<span class="badge badge-user">👤 Usuário</span>'}
+                        ${isBanned ? '<span class="badge badge-banned">🚫 Banido</span>' : ''}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="number">${notifications.length}</div>
+                    <div class="label">📬 Notificações</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">${unread}</div>
+                    <div class="label">🔵 Não lidas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">${isAdmin ? 'Admin' : 'Membro'}</div>
+                    <div class="label">👤 Nível</div>
+                </div>
+            </div>
+            
+            <div class="profile-info">
+                <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;color:#1a1a2e;">📋 Informações da Conta</h3>
+                <div class="info-row">
+                    <span class="label">UID</span>
+                    <span class="value">${uid}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Nome</span>
+                    <span class="value email-value">${escapeHtml(name)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Email</span>
+                    <span class="value email-value">${escapeHtml(email)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Status</span>
+                    <span class="value email-value" style="color:${isBanned ? '#dc3545' : '#27ae60'};">${isBanned ? '🚫 Banido' : '✅ Ativo'}</span>
+                </div>
+            </div>
+            
+            <div class="notifications-section">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <h3>
+                        <span class="material-icons" style="font-size:20px;">notifications</span>
+                        Notificações
+                        ${unread > 0 ? `<span style="font-size:12px;background:#e94560;color:white;padding:2px 10px;border-radius:12px;">${unread} não lidas</span>` : ''}
+                    </h3>
+                    ${unread > 0 ? `<button class="btn-mark-all" onclick="markAllAsRead()">Marcar todas como lidas</button>` : ''}
+                </div>
+                <div class="notification-list">
+                    ${notifsHtml}
+                </div>
+            </div>
+            
+            <div class="actions-row">
+                <a href="https://wazzimagiygg.com" class="btn-action btn-secondary">
+                    <span class="material-icons" style="font-size:18px;">home</span> Voltar ao Site
+                </a>
+                <a href="#" class="btn-action btn-secondary" onclick="location.reload()">
+                    <span class="material-icons" style="font-size:18px;">refresh</span> Recarregar
+                </a>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// INICIALIZAÇÃO
 // ============================================================
 
 auth.onAuthStateChanged(async (user) => {
     try {
         if (user) {
-            // Usuário logado
             console.log('✅ Usuário logado:', user.uid);
             currentUser = user;
             await registerUser(user);
@@ -1365,18 +1302,16 @@ auth.onAuthStateChanged(async (user) => {
             
             console.log('📊 Estado:', { isBanned, isAdmin, uid: user.uid });
             
-            // Esconde o overlay de login
             loginOverlay.classList.add('hidden');
-            
             updateUI();
             
             if (isBanned) {
                 console.log('🚫 Usuário banido!');
                 showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
-                pageContainer.innerHTML = `
-                    <div style="text-align:center;padding:40px 20px;color:#666;">
-                        <span class="material-icons" style="font-size:48px;">lock</span>
-                        <h3>Acesso Restrito</h3>
+                profileContent.innerHTML = `
+                    <div style="text-align:center;padding:60px 20px;color:#666;">
+                        <span class="material-icons" style="font-size:64px;">lock</span>
+                        <h3 style="margin-top:16px;">Acesso Restrito</h3>
                         <p>Sua conta foi banida. Entre em contato com o suporte.</p>
                     </div>
                 `;
@@ -1387,55 +1322,42 @@ auth.onAuthStateChanged(async (user) => {
             await loadNotifications();
             listenNotifications();
             
-            // Atualiza badge do menu
-            const menuBadge = document.getElementById('notifMenuBadge');
-            if (menuBadge) {
-                menuBadge.textContent = unreadCount;
-                menuBadge.style.display = unreadCount > 0 ? 'inline' : 'none';
-            }
+            // Renderizar perfil
+            renderProfile();
             
-            console.log('📊 Carregando dashboard...');
-            navigateTo('dashboard');
         } else {
-            // Usuário NÃO logado - mostra o overlay de login
             console.log('❌ Usuário não logado');
             currentUser = null;
             isBanned = false;
             isAdmin = false;
             userProfile = null;
             
-            // Mostra o overlay de login
             loginOverlay.classList.remove('hidden');
             
-            // Resetar UI
             userAvatar.textContent = '👤';
             userName.textContent = 'Visitante';
             userEmail.textContent = 'Faça login';
             userBadge.innerHTML = '';
             
-            // Esconde conteúdo
-            pageContainer.innerHTML = `
-                <div style="text-align:center;padding:80px 20px;color:#999;">
+            profileContent.innerHTML = `
+                <div style="text-align:center;padding:60px 20px;color:#999;">
                     <span class="material-icons" style="font-size:64px;opacity:0.3;">lock_open</span>
                     <h3 style="margin-top:16px;">Faça login para acessar sua central</h3>
                     <p style="color:#aaa;">Clique em "Entrar com Google" para continuar.</p>
                 </div>
             `;
             
-            // Remove overlay de banido
             bannedOverlay.classList.remove('show');
             document.querySelector('.main-container').style.opacity = '1';
             document.querySelector('.main-container').style.pointerEvents = 'auto';
             document.querySelector('.header').style.opacity = '1';
             document.querySelector('.header').style.pointerEvents = 'auto';
             
-            // Remover listener de notificações
             if (notificationListener) {
                 notificationListener();
                 notificationListener = null;
             }
             
-            // Resetar notificações
             notifications = [];
             unreadCount = 0;
             updateNotificationBadge();
@@ -1446,737 +1368,9 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// Event listener para o botão de login
 googleLoginBtn.addEventListener('click', loginWithGoogle);
 
-console.log('🚀 Central do Usuário WazzimaGiygg - Login na mesma página');
-console.log('📌 Ações integradas das plataformas: acadêmico, jornal, wiki, support');
-
-// ============================================================
-// NAVEGAÇÃO
-// ============================================================
-document.querySelectorAll('.sidebar-item').forEach(item => {
-    item.addEventListener('click', () => {
-        const page = item.dataset.page;
-        if (!page) return;
-        if (isBanned && page !== 'dashboard') {
-            alert('Sua conta está banida. Acesso restrito.');
-            return;
-        }
-        navigateTo(page);
-    });
-});
-
-function navigateTo(page) {
-    currentPage = page;
-    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.sidebar-item[data-page="${page}"]`)?.classList.add('active');
-    renderPage(page);
-}
-
-async function renderPage(page) {
-    pageContainer.innerHTML = '<div class="loading-spinner" style="margin:60px auto;display:block;"></div><p style="text-align:center;color:#888;">Carregando...</p>';
-    
-    switch(page) {
-        case 'dashboard': await renderDashboard(); break;
-        case 'perfil': await renderPerfil(); break;
-        case 'historico': await renderHistorico(); break;
-        case 'notificacoes': await renderNotificacoes(); break;
-        case 'plataformas': await renderPlataformas(); break;
-        case 'admin-actions': if (isAdmin) await renderAdminActions(); else renderUnauthorized(); break;
-        default: pageContainer.innerHTML = '<h2>Página não encontrada</h2>';
-    }
-}
-
-function renderUnauthorized() {
-    pageContainer.innerHTML = `
-        <div class="empty-state">
-            <span class="material-icons">lock</span>
-            <h3>Acesso Negado</h3>
-            <p>Você não tem permissão para acessar esta página.</p>
-        </div>
-    `;
-}
-
-// ============================================================
-// DASHBOARD
-// ============================================================
-async function renderDashboard() {
-    let totalActions = 0;
-    let actionsByPlatform = {};
-    let actionsByType = {};
-    
-    try {
-        const snap = await db.collection('user_actions')
-            .where('userId', '==', currentUser.uid)
-            .orderBy('timestamp', 'desc')
-            .get();
-        
-        totalActions = snap.size;
-        document.getElementById('actionCount').textContent = totalActions;
-        
-        snap.docs.forEach(doc => {
-            const data = doc.data();
-            const platform = data.platform || 'central';
-            const action = data.action || 'view';
-            
-            actionsByPlatform[platform] = (actionsByPlatform[platform] || 0) + 1;
-            actionsByType[action] = (actionsByType[action] || 0) + 1;
-        });
-    } catch (err) {
-        console.error('Erro ao carregar estatísticas:', err);
-    }
-    
-    const platformStats = Object.entries(actionsByPlatform).map(([key, value]) => ({
-        platform: key,
-        count: value,
-        label: getPlatformLabel(key),
-        icon: getPlatformIcon(key)
-    })).sort((a, b) => b.count - a.count);
-    
-    const actionStats = Object.entries(actionsByType).map(([key, value]) => ({
-        action: key,
-        count: value,
-        label: getActionLabel(key)
-    })).sort((a, b) => b.count - a.count);
-    
-    pageContainer.innerHTML = `
-        <div class="page active">
-            <h1 class="page-title">📊 Dashboard</h1>
-            <p class="page-subtitle">Visão geral das suas atividades</p>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="icon material-icons">history</span>
-                    <div class="number">${totalActions}</div>
-                    <div class="label">Total de Ações</div>
-                </div>
-                <div class="stat-card">
-                    <span class="icon material-icons">public</span>
-                    <div class="number">${platformStats.length}</div>
-                    <div class="label">Plataformas Acessadas</div>
-                </div>
-                <div class="stat-card">
-                    <span class="icon material-icons">category</span>
-                    <div class="number">${actionStats.length}</div>
-                    <div class="label">Tipos de Ação</div>
-                </div>
-            </div>
-            
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px;">
-                <div>
-                    <h3 style="font-size:1em;font-weight:600;margin-bottom:12px;">📱 Por Plataforma</h3>
-                    ${platformStats.length === 0 ? '<p style="color:#999;">Nenhuma ação registrada.</p>' : 
-                        platformStats.map(p => `
-                            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;">
-                                <span><span class="material-icons" style="font-size:16px;vertical-align:middle;">${p.icon}</span> ${p.label}</span>
-                                <span style="font-weight:600;">${p.count}</span>
-                            </div>
-                        `).join('')
-                    }
-                </div>
-                <div>
-                    <h3 style="font-size:1em;font-weight:600;margin-bottom:12px;">🏷️ Por Tipo de Ação</h3>
-                    ${actionStats.length === 0 ? '<p style="color:#999;">Nenhuma ação registrada.</p>' : 
-                        actionStats.map(a => `
-                            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;">
-                                <span><span class="action-badge ${getActionBadgeClass(a.action)}">${a.label}</span></span>
-                                <span style="font-weight:600;">${a.count}</span>
-                            </div>
-                        `).join('')
-                    }
-                </div>
-            </div>
-            
-            <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
-                <button class="btn btn-primary" onclick="navigateTo('historico')" style="background:#4a6cf7;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">📜 Ver Histórico Completo</button>
-                <button class="btn btn-outline" onclick="navigateTo('plataformas')" style="background:transparent;border:1px solid #4a6cf7;color:#4a6cf7;padding:10px 20px;border-radius:8px;cursor:pointer;">🌐 Ver Plataformas</button>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================================
-// PERFIL DO USUÁRIO (NOVO)
-// ============================================================
-async function renderPerfil() {
-    if (!currentUser) return;
-    
-    const name = currentUser.displayName || 'Usuário';
-    const email = currentUser.email || 'Email não informado';
-    const uid = currentUser.uid;
-    const photoURL = currentUser.photoURL;
-    
-    pageContainer.innerHTML = `
-        <div class="page active">
-            <h1 class="page-title">👤 Meu Perfil</h1>
-            <p class="page-subtitle">Suas informações pessoais e dados da conta</p>
-            
-            <div style="display:flex;flex-direction:column;gap:20px;max-width:600px;">
-                <div style="display:flex;align-items:center;gap:24px;padding:20px;background:#f8f9fc;border-radius:16px;">
-                    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#e94560,#ff6b6b);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:white;flex-shrink:0;overflow:hidden;">
-                        ${photoURL ? `<img src="${photoURL}" style="width:100%;height:100%;object-fit:cover;">` : getInitials(name)}
-                    </div>
-                    <div>
-                        <h2 style="font-size:24px;">${escapeHtml(name)}</h2>
-                        <p style="color:#888;">${escapeHtml(email)}</p>
-                        ${isAdmin ? '<span class="badge-admin" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;background:#e94560;color:white;">👑 Administrador</span>' : ''}
-                    </div>
-                </div>
-                
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
-                        <div style="font-size:12px;color:#888;">UID</div>
-                        <div style="font-family:monospace;font-size:13px;word-break:break-all;">${uid}</div>
-                    </div>
-                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
-                        <div style="font-size:12px;color:#888;">Status</div>
-                        <div style="font-weight:600;color:#27ae60;">✅ Ativo</div>
-                    </div>
-                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
-                        <div style="font-size:12px;color:#888;">Notificações</div>
-                        <div style="font-weight:600;">${unreadCount} não lidas</div>
-                    </div>
-                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
-                        <div style="font-size:12px;color:#888;">Ações registradas</div>
-                        <div style="font-weight:600;">${allActions.length || 0}</div>
-                    </div>
-                </div>
-                
-                <div style="padding:16px;background:#f8f9fc;border-radius:12px;border-left:4px solid #4a6cf7;">
-                    <p style="font-size:13px;color:#666;">
-                        <span class="material-icons" style="font-size:16px;vertical-align:middle;">info</span>
-                        Seus dados são protegidos de acordo com a LGPD.
-                    </p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================================
-// HISTÓRICO
-// ============================================================
-async function renderHistorico() {
-    pageContainer.innerHTML = `
-        <div class="page active">
-            <h1 class="page-title">📜 Histórico de Ações</h1>
-            <p class="page-subtitle">Consulte todas as suas atividades registradas nas plataformas</p>
-            
-            <div class="filters">
-                <select id="filterPlatform">
-                    <option value="">Todas as Plataformas</option>
-                    <option value="academico">📚 Biblioteca Científica</option>
-                    <option value="jornal">📰 Jornal</option>
-                    <option value="wiki">📖 WikiZero</option>
-                    <option value="support">🎫 Help Desk</option>
-                    <option value="central">🏠 Central do Usuário</option>
-                </select>
-                <select id="filterAction">
-                    <option value="">Todos os Tipos</option>
-                    <option value="create">Criação</option>
-                    <option value="update">Edição</option>
-                    <option value="delete">Exclusão</option>
-                    <option value="view">Visualização</option>
-                    <option value="login">Login</option>
-                    <option value="logout">Logout</option>
-                </select>
-                <input type="text" id="filterSearch" placeholder="Buscar por descrição..." style="flex:1;min-width:150px;padding:8px 14px;border:1px solid #ddd;border-radius:8px;">
-                <button onclick="applyFilters()" style="background:#4a6cf7;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">🔍 Filtrar</button>
-                <button onclick="clearFilters()" style="background:#666;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">Limpar</button>
-            </div>
-            
-            <div id="actionsList">
-                <div class="loading-spinner" style="margin:40px auto;display:block;"></div>
-            </div>
-            <div id="paginationContainer"></div>
-        </div>
-    `;
-    
-    await loadActions();
-}
-
-async function loadActions() {
-    const container = document.getElementById('actionsList');
-    
-    try {
-        const snap = await db.collection('user_actions')
-            .where('userId', '==', currentUser.uid)
-            .orderBy('timestamp', 'desc')
-            .get();
-        
-        allActions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        filteredActions = [...allActions];
-        document.getElementById('actionCount').textContent = allActions.length;
-        
-        applyFilters();
-    } catch (err) {
-        container.innerHTML = `<div class="empty-state">❌ Erro ao carregar: ${err.message}</div>`;
-    }
-}
-
-function applyFilters() {
-    const platform = document.getElementById('filterPlatform').value;
-    const action = document.getElementById('filterAction').value;
-    const search = document.getElementById('filterSearch').value.toLowerCase().trim();
-    
-    filteredActions = allActions.filter(a => {
-        if (platform && a.platform !== platform) return false;
-        if (action && a.action !== action) return false;
-        if (search && !(a.description || '').toLowerCase().includes(search)) return false;
-        return true;
-    });
-    
-    currentActionPage = 1;
-    renderActionsList();
-}
-
-function clearFilters() {
-    document.getElementById('filterPlatform').value = '';
-    document.getElementById('filterAction').value = '';
-    document.getElementById('filterSearch').value = '';
-    applyFilters();
-}
-
-function renderActionsList() {
-    const container = document.getElementById('actionsList');
-    const paginationContainer = document.getElementById('paginationContainer');
-    
-    totalActionPages = Math.ceil(filteredActions.length / ACTIONS_PER_PAGE);
-    if (totalActionPages === 0) totalActionPages = 1;
-    if (currentActionPage > totalActionPages) currentActionPage = totalActionPages;
-    
-    const start = (currentActionPage - 1) * ACTIONS_PER_PAGE;
-    const end = start + ACTIONS_PER_PAGE;
-    const pageActions = filteredActions.slice(start, end);
-    
-    if (pageActions.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <span class="material-icons">history</span>
-                <p>Nenhuma ação encontrada com os filtros aplicados.</p>
-            </div>
-        `;
-        paginationContainer.innerHTML = '';
-        return;
-    }
-    
-    container.innerHTML = pageActions.map(a => `
-        <div class="card" onclick="viewActionDetail('${a.id}')" style="cursor:pointer;">
-            <div class="card-header">
-                <span class="card-title">
-                    <span class="material-icons" style="font-size:18px;vertical-align:middle;">${getPlatformIcon(a.platform)}</span>
-                    ${escapeHtml(a.description || 'Ação registrada')}
-                </span>
-                <div>
-                    <span class="platform-badge ${getPlatformBadgeClass(a.platform)}">${getPlatformLabel(a.platform)}</span>
-                    <span class="action-badge ${getActionBadgeClass(a.action)}">${getActionLabel(a.action)}</span>
-                </div>
-            </div>
-            <div class="card-meta">
-                <span>📅 ${formatDate(a.timestamp)}</span>
-                ${a.targetId ? `<span>🎯 ID: ${escapeHtml(a.targetId.substring(0,8))}...</span>` : ''}
-                ${a.details ? `<span>📝 ${escapeHtml(a.details)}</span>` : ''}
-            </div>
-        </div>
-    `).join('');
-    
-    // Paginação
-    let paginationHTML = '<div class="pagination">';
-    
-    if (currentActionPage > 1) {
-        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(1)">«</button>`;
-        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${currentActionPage - 1})">‹</button>`;
-    }
-    
-    let startPage = Math.max(1, currentActionPage - 2);
-    let endPage = Math.min(totalActionPages, currentActionPage + 2);
-    
-    if (endPage - startPage < 4) {
-        if (startPage === 1) endPage = Math.min(totalActionPages, startPage + 4);
-        else if (endPage === totalActionPages) startPage = Math.max(1, endPage - 4);
-    }
-    
-    if (startPage > 1) paginationHTML += `<span class="pagination-dots">...</span>`;
-    
-    for (let i = startPage; i <= endPage; i++) {
-        if (i === currentActionPage) {
-            paginationHTML += `<button class="pagination-btn active" disabled>${i}</button>`;
-        } else {
-            paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${i})">${i}</button>`;
-        }
-    }
-    
-    if (endPage < totalActionPages) paginationHTML += `<span class="pagination-dots">...</span>`;
-    
-    if (currentActionPage < totalActionPages) {
-        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${currentActionPage + 1})">›</button>`;
-        paginationHTML += `<button class="pagination-btn" onclick="goToActionPage(${totalActionPages})">»</button>`;
-    }
-    
-    paginationHTML += `</div>`;
-    paginationHTML += `<div style="text-align:center;color:#888;font-size:0.85em;">
-        Mostrando ${start + 1} - ${Math.min(end, filteredActions.length)} de ${filteredActions.length} ações
-    </div>`;
-    
-    paginationContainer.innerHTML = paginationHTML;
-}
-
-function goToActionPage(page) {
-    if (page < 1 || page > totalActionPages) return;
-    currentActionPage = page;
-    renderActionsList();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ============================================================
-// DETALHE DA AÇÃO
-// ============================================================
-window.viewActionDetail = function(actionId) {
-    const action = allActions.find(a => a.id === actionId);
-    if (!action) return;
-    
-    showModal(`
-        <h2>📋 Detalhe da Ação</h2>
-        <div style="margin:16px 0;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div><strong>Plataforma:</strong><br><span class="platform-badge ${getPlatformBadgeClass(action.platform)}">${getPlatformLabel(action.platform)}</span></div>
-                <div><strong>Tipo:</strong><br><span class="action-badge ${getActionBadgeClass(action.action)}">${getActionLabel(action.action)}</span></div>
-                <div><strong>Data:</strong><br>${formatDate(action.timestamp)}</div>
-                <div><strong>Usuário:</strong><br>${escapeHtml(action.userName || 'Desconhecido')}</div>
-            </div>
-            <div style="margin-top:12px;padding:12px;background:#f8f9fc;border-radius:8px;">
-                <strong>Descrição:</strong><br>${escapeHtml(action.description || 'Sem descrição')}
-            </div>
-            ${action.details ? `
-                <div style="margin-top:12px;padding:12px;background:#f8f9fc;border-radius:8px;">
-                    <strong>Detalhes:</strong><br>${escapeHtml(action.details)}
-                </div>
-            ` : ''}
-            ${action.targetId ? `
-                <div style="margin-top:12px;font-size:0.85em;color:#888;">
-                    <strong>ID do Alvo:</strong> ${escapeHtml(action.targetId)}
-                </div>
-            ` : ''}
-            ${action.metadata ? `
-                <div style="margin-top:12px;font-size:0.85em;color:#888;">
-                    <strong>Metadados:</strong><br><pre style="background:#f4f4f4;padding:8px;border-radius:4px;font-size:0.8em;overflow-x:auto;">${escapeHtml(JSON.stringify(action.metadata, null, 2))}</pre>
-                </div>
-            ` : ''}
-        </div>
-        <button class="btn btn-outline" onclick="hideModal()" style="background:#666;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">Fechar</button>
-    `);
-};
-
-// ============================================================
-// NOTIFICAÇÕES (PÁGINA COMPLETA)
-// ============================================================
-async function renderNotificacoes() {
-    if (!currentUser) {
-        pageContainer.innerHTML = '<div class="empty-state"><span class="material-icons">lock</span><h3>Faça login</h3></div>';
-        return;
-    }
-    
-    try {
-        // Usa as notificações já carregadas
-        const notifs = notifications;
-        const unread = notifs.filter(n => !n.lida).length;
-        
-        let html = `
-            <div class="page active">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:24px;">
-                    <div>
-                        <h1 class="page-title">🔔 Notificações</h1>
-                        <p class="page-subtitle">${notifs.length} notificações no total • ${unread} não lidas</p>
-                    </div>
-                    ${unread > 0 ? `
-                        <button onclick="markAllAsRead()" style="background:#4a6cf7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
-                            <span class="material-icons" style="vertical-align:middle;">done_all</span> Marcar todas como lidas
-                        </button>
-                    ` : ''}
-                </div>
-        `;
-        
-        if (notifs.length === 0) {
-            html += `
-                <div class="empty-state">
-                    <span class="material-icons">notifications_off</span>
-                    <h3>Nenhuma notificação</h3>
-                    <p>Você não tem notificações no momento.</p>
-                </div>
-            `;
-        } else {
-            html += `
-                <div style="display:flex; flex-direction:column; gap:12px;">
-                    ${notifs.map(notif => `
-                        <div class="card ${notif.lida ? '' : 'unread'}" style="${notif.lida ? '' : 'border-left: 4px solid #4a6cf7; background: #eef2ff;'}">
-                            <div class="card-header">
-                                <span class="card-title">${escapeHtml(notif.titulo || 'Notificação')}</span>
-                                <span style="font-size:12px; color:#999;">${getTimeAgo(notif.timestamp)}</span>
-                            </div>
-                            <div class="card-preview">${escapeHtml(notif.mensagem || '')}</div>
-                            <div class="card-meta" style="margin-top:12px;">
-                                ${notif.lida ? '<span style="color:#999;">✅ Lida</span>' : '<span style="color:#4a6cf7; font-weight:600;">🔵 Não lida</span>'}
-                                ${notif.tipo ? `<span style="color:#888;">📌 ${escapeHtml(notif.tipo)}</span>` : ''}
-                                ${!notif.lida ? `<button onclick="markAsRead('${notif.id}')" style="background:#4a6cf7; color:white; border:none; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:12px;">Marcar como lida</button>` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-        pageContainer.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Erro ao carregar notificações:', error);
-        pageContainer.innerHTML = `<div class="empty-state">❌ Erro ao carregar notificações: ${error.message}</div>`;
-    }
-}
-
-// ============================================================
-// PLATAFORMAS
-// ============================================================
-async function renderPlataformas() {
-    const platforms = [
-        { id: 'academico', name: 'Biblioteca Científica', icon: 'menu_book', url: 'https://academico.wazzimagiygg.com', color: '#0d47a1' },
-        { id: 'jornal', name: 'Jornal WazzimaGiygg', icon: 'newspaper', url: 'https://jornal.wazzimagiygg.com', color: '#c62828' },
-        { id: 'wiki', name: 'WikiZero', icon: 'menu_book', url: 'https://wiki.wazzimagiygg.com', color: '#1b5e20' },
-        { id: 'support', name: 'Help Desk', icon: 'support_agent', url: 'https://support.wazzimagiygg.com', color: '#e65100' },
-        { id: 'central', name: 'Central do Usuário', icon: 'dashboard', url: '#', color: '#4a148c' }
-    ];
-    
-    let actionCounts = {};
-    try {
-        const snap = await db.collection('user_actions')
-            .where('userId', '==', currentUser.uid)
-            .get();
-        snap.docs.forEach(doc => {
-            const platform = doc.data().platform || 'central';
-            actionCounts[platform] = (actionCounts[platform] || 0) + 1;
-        });
-    } catch (err) { console.error(err); }
-    
-    pageContainer.innerHTML = `
-        <div class="page active">
-            <h1 class="page-title">🌐 Plataformas</h1>
-            <p class="page-subtitle">Acesse todas as plataformas do ecossistema WazzimaGiygg</p>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;">
-                ${platforms.map(p => `
-                    <div style="background:white;border-radius:16px;padding:24px;border:1px solid #eef2f7;transition:all 0.3s;cursor:pointer;" 
-                         onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)';"
-                         onmouseout="this.style.transform='none';this.style.boxShadow='none';"
-                         onclick="window.open('${p.url}','_blank')">
-                        <div style="font-size:2.5em;text-align:center;margin-bottom:12px;color:${p.color};">${p.icon}</div>
-                        <h3 style="text-align:center;font-size:1.1em;">${p.name}</h3>
-                        <div style="text-align:center;color:#888;font-size:0.85em;margin-top:8px;">
-                            ${actionCounts[p.id] || 0} ações registradas
-                        </div>
-                        <div style="text-align:center;margin-top:12px;">
-                            <span class="btn btn-sm btn-outline" onclick="event.stopPropagation();window.open('${p.url}','_blank')" style="border:1px solid #4a6cf7;color:#4a6cf7;padding:6px 16px;border-radius:20px;cursor:pointer;">Acessar →</span>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            
-            <div style="margin-top:24px;padding:16px;background:#f8f9fc;border-radius:12px;">
-                <p style="color:#888;font-size:0.85em;text-align:center;">
-                    <span class="material-icons" style="font-size:16px;vertical-align:middle;">info</span>
-                    Todas as suas ações são registradas e podem ser consultadas no <a href="#" onclick="navigateTo('historico')" style="color:#4a6cf7;">Histórico</a>.
-                </p>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================================
-// ADMIN: TODAS AS AÇÕES
-// ============================================================
-async function renderAdminActions() {
-    if (!isAdmin) { renderUnauthorized(); return; }
-    
-    pageContainer.innerHTML = `
-        <div class="page active">
-            <h1 class="page-title">📊 Todas as Ações (Admin)</h1>
-            <p class="page-subtitle">Visualize todas as ações de todos os usuários</p>
-            
-            <div class="filters">
-                <input type="text" id="adminFilterUser" placeholder="ID do Usuário..." style="flex:1;min-width:150px;padding:8px 14px;border:1px solid #ddd;border-radius:8px;">
-                <select id="adminFilterPlatform" style="padding:8px 14px;border:1px solid #ddd;border-radius:8px;">
-                    <option value="">Todas as Plataformas</option>
-                    <option value="academico">📚 Biblioteca Científica</option>
-                    <option value="jornal">📰 Jornal</option>
-                    <option value="wiki">📖 WikiZero</option>
-                    <option value="support">🎫 Help Desk</option>
-                    <option value="central">🏠 Central do Usuário</option>
-                </select>
-                <button onclick="applyAdminFilters()" style="background:#4a6cf7;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">🔍 Filtrar</button>
-                <button onclick="clearAdminFilters()" style="background:#666;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">Limpar</button>
-            </div>
-            
-            <div id="adminActionsList">
-                <div class="loading-spinner" style="margin:40px auto;display:block;"></div>
-            </div>
-            <div id="adminPaginationContainer"></div>
-        </div>
-    `;
-    
-    await loadAdminActions();
-}
-
-let allAdminActions = [];
-let filteredAdminActions = [];
-let adminActionPage = 1;
-let totalAdminPages = 1;
-
-async function loadAdminActions() {
-    const container = document.getElementById('adminActionsList');
-    
-    try {
-        const snap = await db.collection('user_actions')
-            .orderBy('timestamp', 'desc')
-            .limit(500)
-            .get();
-        
-        allAdminActions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        filteredAdminActions = [...allAdminActions];
-        applyAdminFilters();
-    } catch (err) {
-        container.innerHTML = `<div class="empty-state">❌ Erro: ${err.message}</div>`;
-    }
-}
-
-function applyAdminFilters() {
-    const userId = document.getElementById('adminFilterUser').value.toLowerCase().trim();
-    const platform = document.getElementById('adminFilterPlatform').value;
-    
-    filteredAdminActions = allAdminActions.filter(a => {
-        if (userId && !(a.userId || '').toLowerCase().includes(userId)) return false;
-        if (platform && a.platform !== platform) return false;
-        return true;
-    });
-    
-    adminActionPage = 1;
-    renderAdminActionsList();
-}
-
-function clearAdminFilters() {
-    document.getElementById('adminFilterUser').value = '';
-    document.getElementById('adminFilterPlatform').value = '';
-    applyAdminFilters();
-}
-
-function renderAdminActionsList() {
-    const container = document.getElementById('adminActionsList');
-    const paginationContainer = document.getElementById('adminPaginationContainer');
-    
-    totalAdminPages = Math.ceil(filteredAdminActions.length / ACTIONS_PER_PAGE);
-    if (totalAdminPages === 0) totalAdminPages = 1;
-    if (adminActionPage > totalAdminPages) adminActionPage = totalAdminPages;
-    
-    const start = (adminActionPage - 1) * ACTIONS_PER_PAGE;
-    const end = start + ACTIONS_PER_PAGE;
-    const pageActions = filteredAdminActions.slice(start, end);
-    
-    if (pageActions.length === 0) {
-        container.innerHTML = `<div class="empty-state"><span class="material-icons">fact_check</span><p>Nenhuma ação encontrada.</p></div>`;
-        paginationContainer.innerHTML = '';
-        return;
-    }
-    
-    container.innerHTML = `
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Usuário</th>
-                        <th>Plataforma</th>
-                        <th>Ação</th>
-                        <th>Descrição</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${pageActions.map(a => `
-                        <tr onclick="viewActionDetail('${a.id}')" style="cursor:pointer;">
-                            <td>${formatDate(a.timestamp)}</td>
-                            <td><code style="font-size:0.8em;">${escapeHtml(a.userId?.substring(0,10) || '---')}</code></td>
-                            <td><span class="platform-badge ${getPlatformBadgeClass(a.platform)}">${getPlatformLabel(a.platform)}</span></td>
-                            <td><span class="action-badge ${getActionBadgeClass(a.action)}">${getActionLabel(a.action)}</span></td>
-                            <td>${escapeHtml(a.description?.substring(0,50) || '---')}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-    
-    let paginationHTML = '<div class="pagination">';
-    if (adminActionPage > 1) {
-        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(1)">«</button>`;
-        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${adminActionPage - 1})">‹</button>`;
-    }
-    
-    let startPage = Math.max(1, adminActionPage - 2);
-    let endPage = Math.min(totalAdminPages, adminActionPage + 2);
-    if (endPage - startPage < 4) {
-        if (startPage === 1) endPage = Math.min(totalAdminPages, startPage + 4);
-        else if (endPage === totalAdminPages) startPage = Math.max(1, endPage - 4);
-    }
-    
-    if (startPage > 1) paginationHTML += `<span class="pagination-dots">...</span>`;
-    for (let i = startPage; i <= endPage; i++) {
-        if (i === adminActionPage) {
-            paginationHTML += `<button class="pagination-btn active" disabled>${i}</button>`;
-        } else {
-            paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${i})">${i}</button>`;
-        }
-    }
-    if (endPage < totalAdminPages) paginationHTML += `<span class="pagination-dots">...</span>`;
-    
-    if (adminActionPage < totalAdminPages) {
-        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${adminActionPage + 1})">›</button>`;
-        paginationHTML += `<button class="pagination-btn" onclick="goToAdminPage(${totalAdminPages})">»</button>`;
-    }
-    paginationHTML += `</div>`;
-    paginationContainer.innerHTML = paginationHTML;
-}
-
-function goToAdminPage(page) {
-    if (page < 1 || page > totalAdminPages) return;
-    adminActionPage = page;
-    renderAdminActionsList();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Toast
-function showToast(message, isError = false) {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: ${isError ? '#dc3545' : '#27ae60'};
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        z-index: 2000;
-        font-size: 14px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        animation: fadeInOut 3s ease;
-    `;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.5s';
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
-}
+console.log('🚀 Central do Usuário WazzimaGiygg - Versão Simplificada');
 </script>
 </body>
 </html>
