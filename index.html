@@ -119,6 +119,116 @@
             text-transform: uppercase;
         }
 
+        /* NOTIFICATION BELL */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 30px;
+            transition: background 0.2s;
+        }
+        .notification-bell:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .notification-bell .material-icons {
+            font-size: 24px;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #e94560;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #1a1a2e;
+        }
+
+        /* NOTIFICATION DROPDOWN */
+        .notification-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 380px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 200;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-dropdown-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-dropdown-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .notification-dropdown-header button {
+            background: none;
+            border: none;
+            color: #4a6cf7;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .notification-item {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+        .notification-item.unread {
+            background: #eef2ff;
+            border-left: 3px solid #4a6cf7;
+        }
+        .notification-item .notif-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1a1a2e;
+        }
+        .notification-item .notif-message {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .notification-item .notif-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .notification-empty {
+            padding: 30px;
+            text-align: center;
+            color: #999;
+        }
+        .notification-empty .material-icons {
+            font-size: 48px;
+            opacity: 0.4;
+        }
+
         /* BANNED OVERLAY */
         .banned-overlay {
             position: fixed;
@@ -529,10 +639,18 @@
             .content-area { padding: 16px; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .filters { flex-direction: column; }
+            .notification-dropdown {
+                width: 300px;
+                right: -20px;
+            }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .user-name, .user-email { display: none; }
+            .notification-dropdown {
+                width: calc(100vw - 40px);
+                right: -10px;
+            }
         }
     </style>
 </head>
@@ -566,6 +684,25 @@
                 <div class="user-email" id="userEmail">aguarde</div>
             </div>
             <span id="userBadge"></span>
+            
+            <!-- NOTIFICATION BELL -->
+            <div class="notification-bell" id="notificationBell" onclick="toggleNotifications(event)">
+                <span class="material-icons">notifications</span>
+                <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="notification-dropdown-header">
+                        <h3>🔔 Notificações</h3>
+                        <button onclick="markAllAsRead(event)">Marcar todas como lidas</button>
+                    </div>
+                    <div id="notificationList">
+                        <div class="notification-empty">
+                            <span class="material-icons">notifications_off</span>
+                            <p>Nenhuma notificação</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <button class="btn-logout" id="btnLogout">Sair</button>
         </div>
     </div>
@@ -648,6 +785,11 @@ const ACTIONS_PER_PAGE = 20;
 let currentActionPage = 1;
 let totalActionPages = 1;
 
+// NOTIFICAÇÕES
+let notifications = [];
+let unreadCount = 0;
+let notificationListener = null;
+
 // ============================================================
 // DOM REFS
 // ============================================================
@@ -664,6 +806,9 @@ const modalContent = $('modalContent');
 const modalClose = $('modalClose');
 const bannedOverlay = $('bannedOverlay');
 const banDetails = $('banDetails');
+const notifBadge = $('notifBadge');
+const notifDropdown = $('notifDropdown');
+const notificationList = $('notificationList');
 
 // ============================================================
 // FUNÇÕES DE UTILIDADE
@@ -685,6 +830,19 @@ function formatDate(ts) {
         hour: '2-digit', 
         minute: '2-digit' 
     });
+}
+
+function getTimeAgo(date) {
+    if (!date) return '';
+    if (date.toDate) date = date.toDate();
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return 'agora';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `${days}d`;
 }
 
 function getInitials(name) {
@@ -764,6 +922,157 @@ modalClose.addEventListener('click', hideModal);
 modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) hideModal();
 });
+
+// ============================================================
+// NOTIFICAÇÕES
+// ============================================================
+
+// Carregar notificações do usuário
+async function loadNotifications() {
+    if (!currentUser) return;
+    
+    try {
+        const snapshot = await db.collection('notifications')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
+            .limit(50)
+            .get();
+        
+        notifications = [];
+        snapshot.forEach(doc => {
+            notifications.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Calcular não lidas
+        unreadCount = notifications.filter(n => !n.lida).length;
+        updateNotificationBadge();
+        renderNotifications();
+        
+    } catch (error) {
+        console.error('Erro ao carregar notificações:', error);
+    }
+}
+
+// Atualizar o badge do sino
+function updateNotificationBadge() {
+    if (unreadCount > 0) {
+        notifBadge.style.display = 'flex';
+        notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    } else {
+        notifBadge.style.display = 'none';
+    }
+}
+
+// Renderizar notificações no dropdown
+function renderNotifications() {
+    if (notifications.length === 0) {
+        notificationList.innerHTML = `
+            <div class="notification-empty">
+                <span class="material-icons">notifications_off</span>
+                <p>Nenhuma notificação</p>
+            </div>
+        `;
+        return;
+    }
+    
+    notificationList.innerHTML = notifications.map(notif => `
+        <div class="notification-item ${notif.lida ? '' : 'unread'}" onclick="markAsRead('${notif.id}')">
+            <div class="notif-title">${escapeHtml(notif.titulo || 'Notificação')}</div>
+            <div class="notif-message">${escapeHtml(notif.mensagem || '')}</div>
+            <div class="notif-time">${getTimeAgo(notif.timestamp)}</div>
+        </div>
+    `).join('');
+}
+
+// Marcar notificação como lida
+async function markAsRead(notificationId) {
+    try {
+        await db.collection('notifications').doc(notificationId).update({
+            lida: true
+        });
+        
+        // Atualizar localmente
+        const notif = notifications.find(n => n.id === notificationId);
+        if (notif && !notif.lida) {
+            notif.lida = true;
+            unreadCount--;
+            updateNotificationBadge();
+            renderNotifications();
+        }
+    } catch (error) {
+        console.error('Erro ao marcar como lida:', error);
+    }
+}
+
+// Marcar todas como lidas
+async function markAllAsRead(event) {
+    if (event) event.stopPropagation();
+    
+    if (unreadCount === 0) return;
+    
+    try {
+        const batch = db.batch();
+        const unreadNotifs = notifications.filter(n => !n.lida);
+        
+        unreadNotifs.forEach(notif => {
+            const ref = db.collection('notifications').doc(notif.id);
+            batch.update(ref, { lida: true });
+        });
+        
+        await batch.commit();
+        
+        // Atualizar localmente
+        notifications.forEach(n => n.lida = true);
+        unreadCount = 0;
+        updateNotificationBadge();
+        renderNotifications();
+        
+    } catch (error) {
+        console.error('Erro ao marcar todas como lidas:', error);
+    }
+}
+
+// Alternar dropdown de notificações
+function toggleNotifications(event) {
+    if (event) event.stopPropagation();
+    notifDropdown.classList.toggle('show');
+}
+
+// Fechar dropdown ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.notification-bell')) {
+        notifDropdown.classList.remove('show');
+    }
+});
+
+// Escutar novas notificações em tempo real
+function listenNotifications() {
+    if (notificationListener) {
+        notificationListener();
+        notificationListener = null;
+    }
+    
+    if (!currentUser) return;
+    
+    notificationListener = db.collection('notifications')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('timestamp', 'desc')
+        .limit(50)
+        .onSnapshot((snapshot) => {
+            // Atualizar lista
+            notifications = [];
+            snapshot.forEach(doc => {
+                notifications.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Recalcular não lidas
+            unreadCount = notifications.filter(n => !n.lida).length;
+            updateNotificationBadge();
+            renderNotifications();
+        }, (error) => {
+            console.error('Erro no listener de notificações:', error);
+        });
+}
 
 // ============================================================
 // AUTENTICAÇÃO
@@ -916,12 +1225,11 @@ btnLogout.addEventListener('click', async (e) => {
 });
 
 // ============================================================
-// INICIALIZAÇÃO - CORRIGIDA
+// INICIALIZAÇÃO
 // ============================================================
 auth.onAuthStateChanged(async (user) => {
     try {
         if (user) {
-            // Usuário está logado
             console.log('✅ Usuário logado:', user.uid);
             currentUser = user;
             await registerUser(user);
@@ -929,10 +1237,8 @@ auth.onAuthStateChanged(async (user) => {
             
             console.log('📊 Estado:', { isBanned, isAdmin, uid: user.uid });
             
-            // Atualiza a UI
             updateUI();
             
-            // Se estiver banido
             if (isBanned) {
                 console.log('🚫 Usuário banido!');
                 showBannedScreen(userProfile?.banReason || 'Violação das políticas de uso');
@@ -946,18 +1252,25 @@ auth.onAuthStateChanged(async (user) => {
                 return;
             }
             
-            // Carrega o dashboard
+            // Carregar notificações e iniciar listener
+            await loadNotifications();
+            listenNotifications();
+            
             console.log('📊 Carregando dashboard...');
             navigateTo('dashboard');
         } else {
-            // Usuário NÃO está logado
             console.log('❌ Usuário não logado');
             currentUser = null;
             isBanned = false;
             isAdmin = false;
             userProfile = null;
             
-            // Redireciona para login se não estiver já na página
+            // Remover listener de notificações
+            if (notificationListener) {
+                notificationListener();
+                notificationListener = null;
+            }
+            
             if (!window.location.pathname.includes('login.html')) {
                 window.location.href = 'login.html';
             }
@@ -970,7 +1283,7 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-console.log('🚀 Central do Usuário WazzimaGiygg - Versão Histórico (Somente Leitura)');
+console.log('🚀 Central do Usuário WazzimaGiygg - Versão com Notificações');
 console.log('📌 Ações integradas das plataformas: acadêmico, jornal, wiki, support');
 
 // ============================================================
