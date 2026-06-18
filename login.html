@@ -768,30 +768,26 @@ function getStoredGuestUser() {
 }
 
 // ============================================================
-// FUNÇÃO DE REDIRECIONAMENTO COM DADOS DO USUÁRIO (ÚNICA)
+// FUNÇÃO DE REDIRECIONAMENTO COM DADOS DO USUÁRIO
 // ============================================================
 function redirectBack(user) {
     const params = new URLSearchParams(window.location.search);
     let returnUrl = params.get('uid');
     
-    // Se não tiver URL de retorno, vai para a página padrão
     if (!returnUrl) {
         window.location.href = 'https://wazzimagiygg.com/';
         return;
     }
     
     try {
-        // Decodifica a URL
         returnUrl = decodeURIComponent(returnUrl);
         console.log('🔗 URL de retorno:', returnUrl);
         
-        // Se não tiver usuário, redireciona sem dados
         if (!user) {
             window.location.href = returnUrl;
             return;
         }
         
-        // Prepara os dados do usuário para enviar
         const userData = {
             uid: user.uid,
             displayName: user.displayName || 'Usuário',
@@ -800,14 +796,12 @@ function redirectBack(user) {
             isGuest: user.isGuest || false
         };
         
-        // Cria um token simples (apenas para validação)
         const token = btoa(JSON.stringify({ 
             uid: user.uid, 
             timestamp: Date.now(),
-            expires: Date.now() + 3600000 // 1 hora
+            expires: Date.now() + 3600000
         }));
         
-        // Constrói a URL com os parâmetros
         const redirectUrl = new URL(returnUrl);
         redirectUrl.searchParams.set('auth_token', token);
         redirectUrl.searchParams.set('user_data', encodeURIComponent(JSON.stringify(userData)));
@@ -815,12 +809,10 @@ function redirectBack(user) {
         console.log('🔄 Redirecionando para:', redirectUrl.toString());
         console.log('👤 Usuário:', userData.displayName);
         
-        // Redireciona
         window.location.href = redirectUrl.toString();
         
     } catch (error) {
         console.error('❌ Erro no redirecionamento:', error);
-        // Fallback: vai para a página padrão
         window.location.href = 'https://wazzimagiygg.com/';
     }
 }
@@ -891,10 +883,39 @@ async function checkIfUserIsBanned(user) {
 }
 
 // ============================================================
-// FUNÇÕES DE LOGIN - CORRIGIDAS (APENAS UMA VEZ CADA)
+// FUNÇÃO PARA FAZER LOGOUT FORÇADO
+// ============================================================
+async function forceLogoutAndShowBanned(user) {
+    try {
+        // Faz logout imediato
+        await auth.signOut();
+        
+        // Limpa dados locais
+        localStorage.removeItem('wzzm_guest_user');
+        localStorage.removeItem('wzzm_guest_expiry');
+        
+        // Mostra tela de banido
+        const banReason = user?.banReason || 'Violação das políticas de uso';
+        showBannedScreen(banReason);
+        
+        // Esconde status de usuário logado
+        userStatus.classList.remove('show');
+        continueBtn.classList.remove('show');
+        
+        console.log('🚫 Usuário banido - logout forçado realizado');
+        
+    } catch (error) {
+        console.error('Erro ao fazer logout forçado:', error);
+        // Fallback: recarregar a página
+        window.location.reload();
+    }
+}
+
+// ============================================================
+// FUNÇÕES DE LOGIN - COM BLOQUEIO ANTES DO LOGIN CONCLUIR
 // ============================================================
 
-// Google Login - CORRIGIDO (chama redirectBack)
+// Google Login - Com bloqueio ANTES de concluir o login
 googleLoginBtn.addEventListener('click', async () => {
     showLoading('Abrindo Google...');
     errorMessage.classList.remove('show');
@@ -905,25 +926,39 @@ googleLoginBtn.addEventListener('click', async () => {
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
         
-        showLoading('Registrando usuário...');
-        await registerUser(user);
+        // 🔥 VERIFICAÇÃO IMEDIATA - ANTES DE REGISTRAR
+        showLoading('Verificando conta...');
         
+        // Verifica se o usuário está banido ANTES de registrar
         const isBanned = await checkIfUserIsBanned(user);
         
         if (isBanned) {
+            // 🔥 USUÁRIO BANIDO - LOGOUT FORÇADO IMEDIATO
             hideLoading();
-            showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+            await forceLogoutAndShowBanned(user);
+            showError('❌ Esta conta está banida. Você foi desconectado automaticamente.');
             return;
         }
         
+        // SÓ REGISTRA SE NÃO ESTIVER BANIDO
+        showLoading('Registrando usuário...');
+        await registerUser(user);
+        
         hideLoading();
-        redirectBack(user); // ✅ CORRETO
+        redirectBack(user);
         
     } catch (error) {
         hideLoading();
         console.error('Erro no login Google:', error);
         
+        // Se o usuário já está logado mas é banido, faz logout forçado
         if (auth.currentUser) {
+            const isBanned = await checkIfUserIsBanned(auth.currentUser);
+            if (isBanned) {
+                await forceLogoutAndShowBanned(auth.currentUser);
+                showError('❌ Esta conta está banida. Você foi desconectado automaticamente.');
+                return;
+            }
             redirectBack(auth.currentUser);
             return;
         }
@@ -944,7 +979,7 @@ googleLoginBtn.addEventListener('click', async () => {
     }
 });
 
-// Guest Login - CORRIGIDO (chama redirectBack)
+// Guest Login
 guestLoginBtn.addEventListener('click', () => {
     showLoading('Criando acesso convidado...');
     errorMessage.classList.remove('show');
@@ -964,7 +999,7 @@ guestLoginBtn.addEventListener('click', () => {
         localStorage.setItem('wzzm_guest_expiry', expiry.toString());
         
         hideLoading();
-        redirectBack(guestUser); // ✅ CORRETO
+        redirectBack(guestUser);
         
     } catch (error) {
         hideLoading();
@@ -972,17 +1007,24 @@ guestLoginBtn.addEventListener('click', () => {
     }
 });
 
-// Continue Button - CORRIGIDO
+// Continue Button
 continueBtn.addEventListener('click', () => {
     const user = auth.currentUser;
     if (user) {
-        redirectBack(user);
+        // Verifica se o usuário está banido antes de continuar
+        checkIfUserIsBanned(user).then(isBanned => {
+            if (isBanned) {
+                forceLogoutAndShowBanned(user);
+                showError('❌ Esta conta está banida. Você foi desconectado automaticamente.');
+                return;
+            }
+            redirectBack(user);
+        });
     } else {
         const storedGuest = getStoredGuestUser();
         if (storedGuest) {
             redirectBack(storedGuest);
         } else {
-            // Fallback
             window.location.href = 'https://wazzimagiygg.com/';
         }
     }
@@ -1007,7 +1049,7 @@ async function logoutBanned() {
 logoutBannedBtn.addEventListener('click', logoutBanned);
 
 // ============================================================
-// VERIFICAR SESSÃO EXISTENTE
+// VERIFICAR SESSÃO EXISTENTE - COM BLOQUEIO DE BANIDOS
 // ============================================================
 async function checkExistingSession() {
     try {
@@ -1024,7 +1066,9 @@ async function checkExistingSession() {
         if (user) {
             const isBanned = await checkIfUserIsBanned(user);
             if (isBanned) {
-                showBannedScreen('Sua conta foi banida.');
+                // 🔥 USUÁRIO BANIDO - LOGOUT FORÇADO IMEDIATO
+                await forceLogoutAndShowBanned(user);
+                showError('❌ Esta conta está banida. Você foi desconectado automaticamente.');
                 return true;
             }
             statusUserName.textContent = user.displayName || 'Usuário';
@@ -1044,17 +1088,20 @@ async function checkExistingSession() {
 }
 
 // ============================================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO - COM VERIFICAÇÃO DE BANIMENTO
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
     await checkExistingSession();
     
+    // 🔥 VERIFICAÇÃO CONTÍNUA - Se um usuário logado for banido, faz logout
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             try {
                 const isBanned = await checkIfUserIsBanned(user);
                 if (isBanned) {
-                    showBannedScreen('Sua conta foi banida.');
+                    // Usuário banido - logout forçado
+                    await forceLogoutAndShowBanned(user);
+                    showError('❌ Esta conta foi banida. Você foi desconectado automaticamente.');
                     return;
                 }
                 statusUserName.textContent = user.displayName || 'Usuário';
@@ -1083,7 +1130,7 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 console.log('🔐 Página de Login WazzimaGiygg carregada!');
-console.log('📌 Versão 2.0 - Com redirecionamento personalizado');
+console.log('📌 Versão 3.0 - Com bloqueio de usuários banidos');
 if (redirectTo) {
     console.log('🔄 Redirecionamento ativo para:', redirectTo);
 } else {
