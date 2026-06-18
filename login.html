@@ -907,37 +907,122 @@ googleLoginBtn.addEventListener('click', async () => {
     }
 });
 
-    // No login.html, após o login bem-sucedido
+    // ============================================================
+// FUNÇÃO DE REDIRECIONAMENTO COM DADOS DO USUÁRIO
+// ============================================================
 function redirectBack(user) {
     const params = new URLSearchParams(window.location.search);
-    const returnUrl = params.get('uid');
+    let returnUrl = params.get('uid');
     
-    if (returnUrl) {
-        // Codifica os dados do usuário
+    // Se não tiver URL de retorno, vai para a página padrão
+    if (!returnUrl) {
+        window.location.href = 'https://wazzimagiygg.com/';
+        return;
+    }
+    
+    try {
+        // Decodifica a URL
+        returnUrl = decodeURIComponent(returnUrl);
+        console.log('🔗 URL de retorno:', returnUrl);
+        
+        // Se não tiver usuário, redireciona sem dados
+        if (!user) {
+            window.location.href = returnUrl;
+            return;
+        }
+        
+        // Prepara os dados do usuário para enviar
         const userData = {
             uid: user.uid,
             displayName: user.displayName || 'Usuário',
             email: user.email || '',
             photoURL: user.photoURL || '',
-            isGuest: false
+            isGuest: user.isGuest || false
         };
         
-        // Cria um token temporário
-        const token = btoa(JSON.stringify({ uid: user.uid, timestamp: Date.now() }));
+        // Cria um token simples (apenas para validação)
+        const token = btoa(JSON.stringify({ 
+            uid: user.uid, 
+            timestamp: Date.now(),
+            expires: Date.now() + 3600000 // 1 hora
+        }));
         
-        // Constrói a URL de retorno com os parâmetros
+        // Constrói a URL com os parâmetros
         const redirectUrl = new URL(returnUrl);
         redirectUrl.searchParams.set('auth_token', token);
         redirectUrl.searchParams.set('user_data', encodeURIComponent(JSON.stringify(userData)));
         
-        console.log('🔄 Redirecionando de volta para:', redirectUrl.toString());
+        console.log('🔄 Redirecionando para:', redirectUrl.toString());
+        console.log('👤 Usuário:', userData.displayName);
+        
+        // Redireciona
         window.location.href = redirectUrl.toString();
-    } else {
+        
+    } catch (error) {
+        console.error('❌ Erro no redirecionamento:', error);
+        // Fallback: vai para a página padrão
         window.location.href = 'https://wazzimagiygg.com/';
     }
 }
+
+// ============================================================
+// FUNÇÕES DE LOGIN CORRIGIDAS
+// ============================================================
+
+// Google Login - CORRIGIDO
+googleLoginBtn.addEventListener('click', async () => {
+    showLoading('Abrindo Google...');
+    errorMessage.classList.remove('show');
     
-// Guest Login
+    try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        
+        showLoading('Registrando usuário...');
+        
+        await registerUser(user);
+        
+        const isBanned = await checkIfUserIsBanned(user);
+        
+        if (isBanned) {
+            hideLoading();
+            showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+            return;
+        }
+        
+        hideLoading();
+        // ✅ CORRIGIDO: Usa redirectBack com o usuário
+        redirectBack(user);
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Erro no login Google:', error);
+        
+        if (auth.currentUser) {
+            // Se já está logado, tenta redirecionar
+            redirectBack(auth.currentUser);
+            return;
+        }
+        
+        if (error.code === 'auth/popup-closed-by-user') {
+            showError('Login cancelado. Tente novamente.');
+        } else if (error.code === 'auth/popup-blocked') {
+            showError('Pop-up bloqueado. Permita pop-ups para este site.');
+        } else if (error.code === 'auth/network-request-failed') {
+            showError('Erro de rede. Verifique sua conexão.');
+        } else if (error.code === 'auth/too-many-requests') {
+            showError('Muitas tentativas. Aguarde um momento e tente novamente.');
+        } else if (error.code === 'auth/user-disabled') {
+            showError('Esta conta foi desativada. Entre em contato com o suporte.');
+        } else {
+            showError('Erro ao fazer login: ' + error.message);
+        }
+    }
+});
+
+// Guest Login - CORRIGIDO
 guestLoginBtn.addEventListener('click', () => {
     showLoading('Criando acesso convidado...');
     errorMessage.classList.remove('show');
@@ -957,8 +1042,8 @@ guestLoginBtn.addEventListener('click', () => {
         localStorage.setItem('wzzm_guest_expiry', expiry.toString());
         
         hideLoading();
-        // Redireciona usando a função personalizada
-        performRedirect();
+        // ✅ CORRIGIDO: Usa redirectBack com o convidado
+        redirectBack(guestUser);
         
     } catch (error) {
         hideLoading();
@@ -966,9 +1051,20 @@ guestLoginBtn.addEventListener('click', () => {
     }
 });
 
-// Continue Button
+// Continue Button - CORRIGIDO
 continueBtn.addEventListener('click', () => {
-    performRedirect();
+    const user = auth.currentUser;
+    if (user) {
+        redirectBack(user);
+    } else {
+        // Tenta pegar do localStorage
+        const storedGuest = getStoredGuestUser();
+        if (storedGuest) {
+            redirectBack(storedGuest);
+        } else {
+            performRedirect(); // Fallback
+        }
+    }
 });
 
 // ============================================================
