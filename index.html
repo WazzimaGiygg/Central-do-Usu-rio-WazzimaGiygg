@@ -1857,6 +1857,232 @@ function goToAdminPage(page) {
     renderAdminActionsList();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+    // ============================================================
+// PÁGINA DE NOTIFICAÇÕES - ADICIONE NO FINAL DO CÓDIGO
+// ============================================================
+
+async function renderNotificacoes() {
+    if (!currentUser) {
+        pageContainer.innerHTML = '<div class="empty-state"><span class="material-icons">lock</span><h3>Faça login</h3></div>';
+        return;
+    }
+    
+    try {
+        const snapshot = await db.collection('notifications')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
+            .get();
+        
+        const notifs = [];
+        snapshot.forEach(doc => {
+            notifs.push({ id: doc.id, ...doc.data() });
+        });
+        
+        const unreadCount = notifs.filter(n => !n.lida).length;
+        
+        let html = `
+            <div class="page active">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:24px;">
+                    <div>
+                        <h1 class="page-title">🔔 Notificações</h1>
+                        <p class="page-subtitle">${notifs.length} notificações no total • ${unreadCount} não lidas</p>
+                    </div>
+                    ${unreadCount > 0 ? `
+                        <button class="btn btn-primary" onclick="markAllAsRead()" style="background:#4a6cf7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+                            <i class="material-icons" style="vertical-align:middle;">done_all</i> Marcar todas como lidas
+                        </button>
+                    ` : ''}
+                </div>
+        `;
+        
+        if (notifs.length === 0) {
+            html += `
+                <div class="empty-state">
+                    <span class="material-icons">notifications_off</span>
+                    <h3>Nenhuma notificação</h3>
+                    <p>Você não tem notificações no momento.</p>
+                </div>
+            `;
+        } else {
+            html += `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    ${notifs.map(notif => `
+                        <div class="card ${notif.lida ? '' : 'unread'}" style="${notif.lida ? '' : 'border-left: 4px solid #4a6cf7; background: #eef2ff;'}">
+                            <div class="card-header">
+                                <span class="card-title">${escapeHtml(notif.titulo || 'Notificação')}</span>
+                                <span style="font-size:12px; color:#999;">${getTimeAgo(notif.timestamp)}</span>
+                            </div>
+                            <div class="card-preview">${escapeHtml(notif.mensagem || '')}</div>
+                            <div class="card-meta" style="margin-top:12px;">
+                                ${notif.lida ? '<span style="color:#999;">✅ Lida</span>' : '<span style="color:#4a6cf7; font-weight:600;">🔵 Não lida</span>'}
+                                ${notif.tipo ? `<span style="color:#888;">📌 ${escapeHtml(notif.tipo)}</span>` : ''}
+                                ${!notif.lida ? `<button onclick="markAsRead('${notif.id}')" style="background:#4a6cf7; color:white; border:none; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:12px;">Marcar como lida</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        pageContainer.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Erro ao carregar notificações:', error);
+        pageContainer.innerHTML = `<div class="empty-state">❌ Erro ao carregar notificações: ${error.message}</div>`;
+    }
+}
+
+// Adicionar item no menu lateral para notificações
+function addNotificationMenuItem() {
+    const sidebar = document.getElementById('sidebar');
+    const divider = sidebar.querySelector('.sidebar-divider');
+    
+    // Verifica se já existe o item
+    if (document.querySelector('.sidebar-item[data-page="notificacoes"]')) return;
+    
+    const notifItem = document.createElement('a');
+    notifItem.className = 'sidebar-item';
+    notifItem.setAttribute('data-page', 'notificacoes');
+    notifItem.innerHTML = `
+        <span class="material-icons">notifications</span> Notificações
+        <span class="sidebar-badge" id="notifMenuBadge" style="background:#e94560;">${unreadCount}</span>
+    `;
+    notifItem.addEventListener('click', () => {
+        navigateTo('notificacoes');
+    });
+    
+    // Insere após o item "Plataformas"
+    const plataformasItem = document.querySelector('.sidebar-item[data-page="plataformas"]');
+    if (plataformasItem) {
+        plataformasItem.parentNode.insertBefore(notifItem, plataformasItem.nextSibling);
+    } else {
+        sidebar.appendChild(notifItem);
+    }
+}
+
+// Sobrescrever a função navigateTo para incluir notificacoes
+const originalNavigateTo = navigateTo;
+navigateTo = function(page) {
+    if (page === 'notificacoes') {
+        renderNotificacoes();
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.sidebar-item[data-page="notificacoes"]`)?.classList.add('active');
+        return;
+    }
+    originalNavigateTo(page);
+};
+
+// Atualizar badge do menu quando mudar o número de não lidas
+function updateNotificationBadge() {
+    if (unreadCount > 0) {
+        notifBadge.style.display = 'flex';
+        notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        
+        // Atualizar badge do menu
+        const menuBadge = document.getElementById('notifMenuBadge');
+        if (menuBadge) {
+            menuBadge.textContent = unreadCount;
+            menuBadge.style.display = 'inline';
+        }
+    } else {
+        notifBadge.style.display = 'none';
+        const menuBadge = document.getElementById('notifMenuBadge');
+        if (menuBadge) {
+            menuBadge.style.display = 'none';
+        }
+    }
+}
+
+// Adicionar item no menu ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (currentUser && !isBanned) {
+            addNotificationMenuItem();
+        }
+    }, 1000);
+});
+
+// Sobrescrever o listener de notificações para atualizar o menu
+const originalListenNotifications = listenNotifications;
+listenNotifications = function() {
+    if (notificationListener) {
+        notificationListener();
+        notificationListener = null;
+    }
+    
+    if (!currentUser) return;
+    
+    notificationListener = db.collection('notifications')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('timestamp', 'desc')
+        .limit(50)
+        .onSnapshot((snapshot) => {
+            notifications = [];
+            snapshot.forEach(doc => {
+                notifications.push({ id: doc.id, ...doc.data() });
+            });
+            
+            unreadCount = notifications.filter(n => !n.lida).length;
+            updateNotificationBadge();
+            renderNotifications();
+            
+            // Se estiver na página de notificações, recarrega
+            if (currentPage === 'notificacoes') {
+                renderNotificacoes();
+            }
+            
+            // Atualiza badge do menu
+            const menuBadge = document.getElementById('notifMenuBadge');
+            if (menuBadge) {
+                menuBadge.textContent = unreadCount;
+                menuBadge.style.display = unreadCount > 0 ? 'inline' : 'none';
+            }
+        }, (error) => {
+            console.error('Erro no listener de notificações:', error);
+        });
+};
+
+// Adicionar função para marcar todas como lidas na página
+window.markAllAsRead = async function(event) {
+    if (event) event.stopPropagation();
+    
+    if (unreadCount === 0) {
+        if (currentPage === 'notificacoes') {
+            renderNotificacoes();
+        }
+        return;
+    }
+    
+    try {
+        const batch = db.batch();
+        const unreadNotifs = notifications.filter(n => !n.lida);
+        
+        unreadNotifs.forEach(notif => {
+            const ref = db.collection('notifications').doc(notif.id);
+            batch.update(ref, { lida: true });
+        });
+        
+        await batch.commit();
+        
+        notifications.forEach(n => n.lida = true);
+        unreadCount = 0;
+        updateNotificationBadge();
+        renderNotifications();
+        
+        // Se estiver na página de notificações, recarrega
+        if (currentPage === 'notificacoes') {
+            renderNotificacoes();
+        }
+        
+        showToast('✅ Todas as notificações marcadas como lidas!', 'success');
+        
+    } catch (error) {
+        console.error('Erro ao marcar todas como lidas:', error);
+        showToast('❌ Erro ao marcar como lidas', 'error');
+    }
+};
 </script>
 </body>
 </html>
