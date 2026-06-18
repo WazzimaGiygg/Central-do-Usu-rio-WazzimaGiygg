@@ -907,6 +907,36 @@ googleLoginBtn.addEventListener('click', async () => {
     }
 });
 
+    // No login.html, após o login bem-sucedido
+function redirectBack(user) {
+    const params = new URLSearchParams(window.location.search);
+    const returnUrl = params.get('uid');
+    
+    if (returnUrl) {
+        // Codifica os dados do usuário
+        const userData = {
+            uid: user.uid,
+            displayName: user.displayName || 'Usuário',
+            email: user.email || '',
+            photoURL: user.photoURL || '',
+            isGuest: false
+        };
+        
+        // Cria um token temporário
+        const token = btoa(JSON.stringify({ uid: user.uid, timestamp: Date.now() }));
+        
+        // Constrói a URL de retorno com os parâmetros
+        const redirectUrl = new URL(returnUrl);
+        redirectUrl.searchParams.set('auth_token', token);
+        redirectUrl.searchParams.set('user_data', encodeURIComponent(JSON.stringify(userData)));
+        
+        console.log('🔄 Redirecionando de volta para:', redirectUrl.toString());
+        window.location.href = redirectUrl.toString();
+    } else {
+        window.location.href = 'https://wazzimagiygg.com/';
+    }
+}
+    
 // Guest Login
 guestLoginBtn.addEventListener('click', () => {
     showLoading('Criando acesso convidado...');
