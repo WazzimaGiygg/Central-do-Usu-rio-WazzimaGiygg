@@ -853,19 +853,6 @@ function getInitials(name) {
     return name.substring(0, 2).toUpperCase();
 }
 
-function getTimeAgo(date) {
-    if (!date) return '';
-    if (date.toDate) date = date.toDate();
-    const seconds = Math.floor((new Date() - date) / 1000);
-    if (seconds < 60) return 'agora';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    const days = Math.floor(hours / 24);
-    return `${days}d`;
-}
-
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -880,13 +867,19 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================================
-// NOTIFICAÇÕES
+// NOTIFICAÇÕES - COMPLETO E FUNCIONAL
 // ============================================================
 
+// Carregar notificações do usuário
 async function loadNotifications() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.log('❌ Nenhum usuário logado para carregar notificações');
+        return;
+    }
     
     try {
+        console.log('📥 Carregando notificações para:', currentUser.uid);
+        
         const snapshot = await db.collection('notifications')
             .where('userId', '==', currentUser.uid)
             .orderBy('timestamp', 'desc')
@@ -895,19 +888,36 @@ async function loadNotifications() {
         
         notifications = [];
         snapshot.forEach(doc => {
-            notifications.push({ id: doc.id, ...doc.data() });
+            notifications.push({ 
+                id: doc.id, 
+                ...doc.data(),
+                // Garantir que timestamp seja um objeto Date
+                timestamp: doc.data().timestamp || new Date()
+            });
+        });
+        
+        // Ordenar por timestamp (mais recente primeiro)
+        notifications.sort((a, b) => {
+            const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+            const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+            return dateB - dateA;
         });
         
         unreadCount = notifications.filter(n => !n.lida).length;
+        
+        console.log(`📬 ${notifications.length} notificações carregadas, ${unreadCount} não lidas`);
+        
         updateNotificationBadge();
         renderNotifications();
         renderProfile();
         
     } catch (error) {
-        console.error('Erro ao carregar notificações:', error);
+        console.error('❌ Erro ao carregar notificações:', error);
+        // Não mostrar erro para o usuário, apenas log
     }
 }
 
+// Atualizar o badge do sino
 function updateNotificationBadge() {
     if (unreadCount > 0) {
         notifBadge.style.display = 'flex';
@@ -917,7 +927,10 @@ function updateNotificationBadge() {
     }
 }
 
+// Renderizar notificações no dropdown
 function renderNotifications() {
+    if (!notificationList) return;
+    
     if (notifications.length === 0) {
         notificationList.innerHTML = `
             <div class="notification-empty">
@@ -928,7 +941,10 @@ function renderNotifications() {
         return;
     }
     
-    notificationList.innerHTML = notifications.map(notif => `
+    // Mostrar apenas as 10 mais recentes no dropdown
+    const recentNotifs = notifications.slice(0, 10);
+    
+    notificationList.innerHTML = recentNotifs.map(notif => `
         <div class="notification-item ${notif.lida ? '' : 'unread'}" onclick="markAsRead('${notif.id}')">
             <div class="notif-title">${escapeHtml(notif.titulo || 'Notificação')}</div>
             <div class="notif-message">${escapeHtml(notif.mensagem || '')}</div>
@@ -937,12 +953,16 @@ function renderNotifications() {
     `).join('');
 }
 
+// Marcar notificação como lida
 async function markAsRead(notificationId) {
+    if (!notificationId) return;
+    
     try {
         await db.collection('notifications').doc(notificationId).update({
             lida: true
         });
         
+        // Atualizar localmente
         const notif = notifications.find(n => n.id === notificationId);
         if (notif && !notif.lida) {
             notif.lida = true;
@@ -950,16 +970,26 @@ async function markAsRead(notificationId) {
             updateNotificationBadge();
             renderNotifications();
             renderProfile();
+            
+            // Fechar dropdown se estiver aberto
+            if (notifDropdown) {
+                notifDropdown.classList.remove('show');
+            }
         }
     } catch (error) {
-        console.error('Erro ao marcar como lida:', error);
+        console.error('❌ Erro ao marcar como lida:', error);
+        showToast('❌ Erro ao marcar notificação como lida', 'error');
     }
 }
 
+// Marcar todas como lidas
 async function markAllAsRead(event) {
     if (event) event.stopPropagation();
     
-    if (unreadCount === 0) return;
+    if (unreadCount === 0) {
+        showToast('ℹ️ Não há notificações não lidas', 'info');
+        return;
+    }
     
     try {
         const batch = db.batch();
@@ -972,6 +1002,7 @@ async function markAllAsRead(event) {
         
         await batch.commit();
         
+        // Atualizar localmente
         notifications.forEach(n => n.lida = true);
         unreadCount = 0;
         updateNotificationBadge();
@@ -980,47 +1011,85 @@ async function markAllAsRead(event) {
         
         showToast('✅ Todas as notificações marcadas como lidas!', 'success');
         
+        // Fechar dropdown
+        if (notifDropdown) {
+            notifDropdown.classList.remove('show');
+        }
+        
     } catch (error) {
-        console.error('Erro ao marcar todas como lidas:', error);
-        showToast('❌ Erro ao marcar como lidas', 'error');
+        console.error('❌ Erro ao marcar todas como lidas:', error);
+        showToast('❌ Erro ao marcar notificações como lidas', 'error');
     }
 }
 
+// Alternar dropdown de notificações
 function toggleNotifications(event) {
     if (event) event.stopPropagation();
-    notifDropdown.classList.toggle('show');
+    if (notifDropdown) {
+        notifDropdown.classList.toggle('show');
+        
+        // Se estiver abrindo, recarregar notificações
+        if (notifDropdown.classList.contains('show')) {
+            loadNotifications();
+        }
+    }
 }
 
+// Fechar dropdown ao clicar fora
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.notification-bell')) {
-        notifDropdown.classList.remove('show');
+        if (notifDropdown) {
+            notifDropdown.classList.remove('show');
+        }
     }
 });
 
+// Escutar novas notificações em tempo real
 function listenNotifications() {
+    // Remover listener anterior se existir
     if (notificationListener) {
         notificationListener();
         notificationListener = null;
     }
     
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.log('❌ Nenhum usuário para escutar notificações');
+        return;
+    }
+    
+    console.log('👂 Iniciando listener de notificações para:', currentUser.uid);
     
     notificationListener = db.collection('notifications')
         .where('userId', '==', currentUser.uid)
         .orderBy('timestamp', 'desc')
         .limit(50)
         .onSnapshot((snapshot) => {
+            // Atualizar lista
             notifications = [];
             snapshot.forEach(doc => {
-                notifications.push({ id: doc.id, ...doc.data() });
+                notifications.push({ 
+                    id: doc.id, 
+                    ...doc.data(),
+                    timestamp: doc.data().timestamp || new Date()
+                });
+            });
+            
+            // Ordenar por timestamp (mais recente primeiro)
+            notifications.sort((a, b) => {
+                const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                return dateB - dateA;
             });
             
             unreadCount = notifications.filter(n => !n.lida).length;
+            
+            console.log(`🔔 ${notifications.length} notificações, ${unreadCount} não lidas`);
+            
             updateNotificationBadge();
             renderNotifications();
             renderProfile();
         }, (error) => {
-            console.error('Erro no listener de notificações:', error);
+            console.error('❌ Erro no listener de notificações:', error);
         });
 }
 
@@ -1039,6 +1108,7 @@ async function loginWithGoogle() {
         const result = await auth.signInWithPopup(provider);
         
         console.log('✅ Login realizado com sucesso!');
+        showToast('✅ Login realizado com sucesso!', 'success');
         
     } catch (error) {
         console.error('❌ Erro no login:', error);
@@ -1173,6 +1243,7 @@ btnLogout.addEventListener('click', async (e) => {
             return;
         }
         await auth.signOut();
+        // O onAuthStateChanged vai lidar com a atualização da UI
     } catch (error) {
         console.error('Erro no logout:', error);
         await auth.signOut();
@@ -1297,6 +1368,8 @@ auth.onAuthStateChanged(async (user) => {
         if (user) {
             console.log('✅ Usuário logado:', user.uid);
             currentUser = user;
+            
+            // Registrar usuário
             await registerUser(user);
             await loadUserProfile(user.uid);
             
@@ -1353,6 +1426,7 @@ auth.onAuthStateChanged(async (user) => {
             document.querySelector('.header').style.opacity = '1';
             document.querySelector('.header').style.pointerEvents = 'auto';
             
+            // Remover listener
             if (notificationListener) {
                 notificationListener();
                 notificationListener = null;
@@ -1368,9 +1442,12 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
+// Event listener para o botão de login
 googleLoginBtn.addEventListener('click', loginWithGoogle);
 
-console.log('🚀 Central do Usuário WazzimaGiygg - Versão Simplificada');
+console.log('🚀 Central do Usuário WazzimaGiygg - Versão com Notificações');
+console.log('📌 Coleção de notificações: "notifications"');
+console.log('🔔 Sistema de notificações integrado com o sistema de advertências');
 </script>
 </body>
 </html>
