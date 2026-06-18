@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central do Usuário - Histórico de Ações</title>
+    <title>Central do Usuário - WazzimaGiygg</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -119,6 +119,81 @@
             text-transform: uppercase;
         }
 
+        /* LOGIN OVERLAY (na mesma página) */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+        .login-overlay.hidden {
+            display: none;
+        }
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .login-card .logo-big {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        .login-card h2 {
+            color: #1a1a2e;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .login-card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .login-card .btn-google-login {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+        .login-card .btn-google-login:hover {
+            background: #357ae8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+        .login-card .login-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+        .login-card .login-error.show {
+            display: block;
+        }
+
         /* NOTIFICATION BELL */
         .notification-bell {
             position: relative;
@@ -154,7 +229,6 @@
             border: 2px solid #1a1a2e;
         }
 
-        /* NOTIFICATION DROPDOWN */
         .notification-dropdown {
             position: absolute;
             top: calc(100% + 10px);
@@ -223,10 +297,6 @@
             padding: 30px;
             text-align: center;
             color: #999;
-        }
-        .notification-empty .material-icons {
-            font-size: 48px;
-            opacity: 0.4;
         }
 
         /* BANNED OVERLAY */
@@ -348,9 +418,6 @@
             border-radius: 12px;
             font-weight: 500;
         }
-        .sidebar-badge.green { background: #2ecc71; }
-        .sidebar-badge.orange { background: #f39c12; }
-        .sidebar-badge.red { background: #e74c3c; }
 
         /* CONTENT */
         .content-area {
@@ -475,11 +542,7 @@
             gap: 16px;
             flex-wrap: wrap;
         }
-        .card-preview {
-            margin-top: 8px;
-            color: #666;
-            font-size: 0.9em;
-        }
+
         .platform-badge {
             display: inline-block;
             padding: 2px 10px;
@@ -507,7 +570,6 @@
         .action-badge.login { background: #d1ecf1; color: #0c5460; }
         .action-badge.logout { background: #f5c6cb; color: #721c24; }
 
-        /* PAGINATION */
         .pagination {
             display: flex;
             justify-content: center;
@@ -651,6 +713,9 @@
                 width: calc(100vw - 40px);
                 right: -10px;
             }
+            .login-card {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
@@ -664,6 +729,27 @@
         <p>Sua conta foi banida permanentemente do sistema.</p>
         <div id="banDetails" class="ban-details">Motivo: Violação das políticas de uso</div>
         <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
+    </div>
+</div>
+
+<!-- LOGIN OVERLAY (NA MESMA PÁGINA) -->
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+        <div class="logo-big">🔐</div>
+        <h2>Central do Usuário</h2>
+        <p>Faça login para acessar suas informações, histórico e notificações.</p>
+        
+        <button id="googleLoginBtn" class="btn-google-login">
+            <svg viewBox="0 0 48 48" style="width:24px;height:24px;">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Entrar com Google
+        </button>
+        
+        <div id="loginError" class="login-error">Erro ao fazer login. Tente novamente.</div>
     </div>
 </div>
 
@@ -717,9 +803,16 @@
         <a class="sidebar-item active" data-page="dashboard">
             <span class="material-icons">dashboard</span> Dashboard
         </a>
+        <a class="sidebar-item" data-page="perfil">
+            <span class="material-icons">person</span> Meu Perfil
+        </a>
         <a class="sidebar-item" data-page="historico">
             <span class="material-icons">history</span> Histórico
             <span class="sidebar-badge" id="actionCount">0</span>
+        </a>
+        <a class="sidebar-item" data-page="notificacoes">
+            <span class="material-icons">notifications</span> Notificações
+            <span class="sidebar-badge" id="notifMenuBadge" style="background:#e94560; display:none;">0</span>
         </a>
         
         <div class="sidebar-divider"></div>
@@ -809,6 +902,9 @@ const banDetails = $('banDetails');
 const notifBadge = $('notifBadge');
 const notifDropdown = $('notifDropdown');
 const notificationList = $('notificationList');
+const loginOverlay = $('loginOverlay');
+const loginError = $('loginError');
+const googleLoginBtn = $('googleLoginBtn');
 
 // ============================================================
 // FUNÇÕES DE UTILIDADE
@@ -854,10 +950,10 @@ function getInitials(name) {
 
 function getPlatformIcon(platform) {
     const icons = {
-        'academico': 'Acadêmico',
-        'jornal': 'Jornal',
-        'wiki': 'Wiki',
-        'support': 'Suporte ao Usuário',
+        'academico': 'menu_book',
+        'jornal': 'newspaper',
+        'wiki': 'menu_book',
+        'support': 'support_agent',
         'central': 'dashboard'
     };
     return icons[platform] || 'public';
@@ -927,7 +1023,6 @@ modalOverlay.addEventListener('click', (e) => {
 // NOTIFICAÇÕES
 // ============================================================
 
-// Carregar notificações do usuário
 async function loadNotifications() {
     if (!currentUser) return;
     
@@ -943,7 +1038,6 @@ async function loadNotifications() {
             notifications.push({ id: doc.id, ...doc.data() });
         });
         
-        // Calcular não lidas
         unreadCount = notifications.filter(n => !n.lida).length;
         updateNotificationBadge();
         renderNotifications();
@@ -953,17 +1047,25 @@ async function loadNotifications() {
     }
 }
 
-// Atualizar o badge do sino
 function updateNotificationBadge() {
     if (unreadCount > 0) {
         notifBadge.style.display = 'flex';
         notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        
+        const menuBadge = document.getElementById('notifMenuBadge');
+        if (menuBadge) {
+            menuBadge.textContent = unreadCount;
+            menuBadge.style.display = 'inline';
+        }
     } else {
         notifBadge.style.display = 'none';
+        const menuBadge = document.getElementById('notifMenuBadge');
+        if (menuBadge) {
+            menuBadge.style.display = 'none';
+        }
     }
 }
 
-// Renderizar notificações no dropdown
 function renderNotifications() {
     if (notifications.length === 0) {
         notificationList.innerHTML = `
@@ -984,27 +1086,28 @@ function renderNotifications() {
     `).join('');
 }
 
-// Marcar notificação como lida
 async function markAsRead(notificationId) {
     try {
         await db.collection('notifications').doc(notificationId).update({
             lida: true
         });
         
-        // Atualizar localmente
         const notif = notifications.find(n => n.id === notificationId);
         if (notif && !notif.lida) {
             notif.lida = true;
             unreadCount--;
             updateNotificationBadge();
             renderNotifications();
+            
+            if (currentPage === 'notificacoes') {
+                renderNotificacoes();
+            }
         }
     } catch (error) {
         console.error('Erro ao marcar como lida:', error);
     }
 }
 
-// Marcar todas como lidas
 async function markAllAsRead(event) {
     if (event) event.stopPropagation();
     
@@ -1021,31 +1124,34 @@ async function markAllAsRead(event) {
         
         await batch.commit();
         
-        // Atualizar localmente
         notifications.forEach(n => n.lida = true);
         unreadCount = 0;
         updateNotificationBadge();
         renderNotifications();
         
+        if (currentPage === 'notificacoes') {
+            renderNotificacoes();
+        }
+        
+        showToast('✅ Todas as notificações marcadas como lidas!');
+        
     } catch (error) {
         console.error('Erro ao marcar todas como lidas:', error);
+        showToast('❌ Erro ao marcar como lidas', true);
     }
 }
 
-// Alternar dropdown de notificações
 function toggleNotifications(event) {
     if (event) event.stopPropagation();
     notifDropdown.classList.toggle('show');
 }
 
-// Fechar dropdown ao clicar fora
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.notification-bell')) {
         notifDropdown.classList.remove('show');
     }
 });
 
-// Escutar novas notificações em tempo real
 function listenNotifications() {
     if (notificationListener) {
         notificationListener();
@@ -1059,24 +1165,59 @@ function listenNotifications() {
         .orderBy('timestamp', 'desc')
         .limit(50)
         .onSnapshot((snapshot) => {
-            // Atualizar lista
             notifications = [];
             snapshot.forEach(doc => {
                 notifications.push({ id: doc.id, ...doc.data() });
             });
             
-            // Recalcular não lidas
             unreadCount = notifications.filter(n => !n.lida).length;
             updateNotificationBadge();
             renderNotifications();
+            
+            if (currentPage === 'notificacoes') {
+                renderNotificacoes();
+            }
         }, (error) => {
             console.error('Erro no listener de notificações:', error);
         });
 }
 
 // ============================================================
-// AUTENTICAÇÃO
+// AUTENTICAÇÃO - LOGIN NA MESMA PÁGINA
 // ============================================================
+
+// Login com Google (na mesma página)
+async function loginWithGoogle() {
+    try {
+        googleLoginBtn.disabled = true;
+        googleLoginBtn.innerHTML = '⏳ Aguarde...';
+        loginError.classList.remove('show');
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const result = await auth.signInWithPopup(provider);
+        
+        // Login bem-sucedido - o onAuthStateChanged vai tratar
+        console.log('✅ Login realizado com sucesso!');
+        
+    } catch (error) {
+        console.error('❌ Erro no login:', error);
+        loginError.textContent = 'Erro ao fazer login: ' + error.message;
+        loginError.classList.add('show');
+        
+        googleLoginBtn.disabled = false;
+        googleLoginBtn.innerHTML = `
+            <svg viewBox="0 0 48 48" style="width:24px;height:24px;">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Entrar com Google
+        `;
+    }
+}
+
 async function registerUser(user) {
     try {
         const uid = user.uid;
@@ -1133,24 +1274,11 @@ function showBannedScreen(reason = 'Violação das políticas de uso') {
 
 async function logoutBanned() {
     try {
-        const btn = document.querySelector('.btn-logout-banned');
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = 'Saindo...';
-        }
-        
         await auth.signOut();
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 100);
+        location.reload();
     } catch (error) {
         console.error('Erro ao fazer logout:', error);
-        try {
-            await auth.signOut();
-            window.location.href = 'login.html';
-        } catch (e) {
-            window.location.href = 'login.html';
-        }
+        location.reload();
     }
 }
 
@@ -1207,7 +1335,6 @@ function updateUI() {
     }
 }
 
-// Event listener do logout
 btnLogout.addEventListener('click', async (e) => {
     e.preventDefault();
     try {
@@ -1216,26 +1343,30 @@ btnLogout.addEventListener('click', async (e) => {
             return;
         }
         await auth.signOut();
-        window.location.href = 'login.html';
+        // O onAuthStateChanged vai mostrar o login novamente
     } catch (error) {
         console.error('Erro no logout:', error);
         await auth.signOut();
-        window.location.href = 'login.html';
     }
 });
 
 // ============================================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO - VERIFICA SESSÃO E MOSTRA LOGIN NA MESMA PÁGINA
 // ============================================================
+
 auth.onAuthStateChanged(async (user) => {
     try {
         if (user) {
+            // Usuário logado
             console.log('✅ Usuário logado:', user.uid);
             currentUser = user;
             await registerUser(user);
             await loadUserProfile(user.uid);
             
             console.log('📊 Estado:', { isBanned, isAdmin, uid: user.uid });
+            
+            // Esconde o overlay de login
+            loginOverlay.classList.add('hidden');
             
             updateUI();
             
@@ -1252,18 +1383,51 @@ auth.onAuthStateChanged(async (user) => {
                 return;
             }
             
-            // Carregar notificações e iniciar listener
+            // Carregar notificações
             await loadNotifications();
             listenNotifications();
+            
+            // Atualiza badge do menu
+            const menuBadge = document.getElementById('notifMenuBadge');
+            if (menuBadge) {
+                menuBadge.textContent = unreadCount;
+                menuBadge.style.display = unreadCount > 0 ? 'inline' : 'none';
+            }
             
             console.log('📊 Carregando dashboard...');
             navigateTo('dashboard');
         } else {
+            // Usuário NÃO logado - mostra o overlay de login
             console.log('❌ Usuário não logado');
             currentUser = null;
             isBanned = false;
             isAdmin = false;
             userProfile = null;
+            
+            // Mostra o overlay de login
+            loginOverlay.classList.remove('hidden');
+            
+            // Resetar UI
+            userAvatar.textContent = '👤';
+            userName.textContent = 'Visitante';
+            userEmail.textContent = 'Faça login';
+            userBadge.innerHTML = '';
+            
+            // Esconde conteúdo
+            pageContainer.innerHTML = `
+                <div style="text-align:center;padding:80px 20px;color:#999;">
+                    <span class="material-icons" style="font-size:64px;opacity:0.3;">lock_open</span>
+                    <h3 style="margin-top:16px;">Faça login para acessar sua central</h3>
+                    <p style="color:#aaa;">Clique em "Entrar com Google" para continuar.</p>
+                </div>
+            `;
+            
+            // Remove overlay de banido
+            bannedOverlay.classList.remove('show');
+            document.querySelector('.main-container').style.opacity = '1';
+            document.querySelector('.main-container').style.pointerEvents = 'auto';
+            document.querySelector('.header').style.opacity = '1';
+            document.querySelector('.header').style.pointerEvents = 'auto';
             
             // Remover listener de notificações
             if (notificationListener) {
@@ -1271,19 +1435,21 @@ auth.onAuthStateChanged(async (user) => {
                 notificationListener = null;
             }
             
-            if (!window.location.pathname.includes('login.html')) {
-                window.location.href = 'login.html';
-            }
+            // Resetar notificações
+            notifications = [];
+            unreadCount = 0;
+            updateNotificationBadge();
         }
     } catch (error) {
         console.error('❌ Erro na inicialização:', error);
-        if (!window.location.pathname.includes('login.html')) {
-            window.location.href = 'login.html';
-        }
+        loginOverlay.classList.remove('hidden');
     }
 });
 
-console.log('🚀 Central do Usuário WazzimaGiygg - Versão com Notificações');
+// Event listener para o botão de login
+googleLoginBtn.addEventListener('click', loginWithGoogle);
+
+console.log('🚀 Central do Usuário WazzimaGiygg - Login na mesma página');
 console.log('📌 Ações integradas das plataformas: acadêmico, jornal, wiki, support');
 
 // ============================================================
@@ -1313,7 +1479,9 @@ async function renderPage(page) {
     
     switch(page) {
         case 'dashboard': await renderDashboard(); break;
+        case 'perfil': await renderPerfil(); break;
         case 'historico': await renderHistorico(); break;
+        case 'notificacoes': await renderNotificacoes(); break;
         case 'plataformas': await renderPlataformas(); break;
         case 'admin-actions': if (isAdmin) await renderAdminActions(); else renderUnauthorized(); break;
         default: pageContainer.innerHTML = '<h2>Página não encontrada</h2>';
@@ -1421,15 +1589,73 @@ async function renderDashboard() {
             </div>
             
             <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
-                <button class="btn btn-primary" onclick="navigateTo('historico')">📜 Ver Histórico Completo</button>
-                <button class="btn btn-outline" onclick="navigateTo('plataformas')">🌐 Ver Plataformas</button>
+                <button class="btn btn-primary" onclick="navigateTo('historico')" style="background:#4a6cf7;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">📜 Ver Histórico Completo</button>
+                <button class="btn btn-outline" onclick="navigateTo('plataformas')" style="background:transparent;border:1px solid #4a6cf7;color:#4a6cf7;padding:10px 20px;border-radius:8px;cursor:pointer;">🌐 Ver Plataformas</button>
             </div>
         </div>
     `;
 }
 
 // ============================================================
-// HISTÓRICO (Somente Leitura)
+// PERFIL DO USUÁRIO (NOVO)
+// ============================================================
+async function renderPerfil() {
+    if (!currentUser) return;
+    
+    const name = currentUser.displayName || 'Usuário';
+    const email = currentUser.email || 'Email não informado';
+    const uid = currentUser.uid;
+    const photoURL = currentUser.photoURL;
+    
+    pageContainer.innerHTML = `
+        <div class="page active">
+            <h1 class="page-title">👤 Meu Perfil</h1>
+            <p class="page-subtitle">Suas informações pessoais e dados da conta</p>
+            
+            <div style="display:flex;flex-direction:column;gap:20px;max-width:600px;">
+                <div style="display:flex;align-items:center;gap:24px;padding:20px;background:#f8f9fc;border-radius:16px;">
+                    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#e94560,#ff6b6b);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:white;flex-shrink:0;overflow:hidden;">
+                        ${photoURL ? `<img src="${photoURL}" style="width:100%;height:100%;object-fit:cover;">` : getInitials(name)}
+                    </div>
+                    <div>
+                        <h2 style="font-size:24px;">${escapeHtml(name)}</h2>
+                        <p style="color:#888;">${escapeHtml(email)}</p>
+                        ${isAdmin ? '<span class="badge-admin" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;background:#e94560;color:white;">👑 Administrador</span>' : ''}
+                    </div>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
+                        <div style="font-size:12px;color:#888;">UID</div>
+                        <div style="font-family:monospace;font-size:13px;word-break:break-all;">${uid}</div>
+                    </div>
+                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
+                        <div style="font-size:12px;color:#888;">Status</div>
+                        <div style="font-weight:600;color:#27ae60;">✅ Ativo</div>
+                    </div>
+                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
+                        <div style="font-size:12px;color:#888;">Notificações</div>
+                        <div style="font-weight:600;">${unreadCount} não lidas</div>
+                    </div>
+                    <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
+                        <div style="font-size:12px;color:#888;">Ações registradas</div>
+                        <div style="font-weight:600;">${allActions.length || 0}</div>
+                    </div>
+                </div>
+                
+                <div style="padding:16px;background:#f8f9fc;border-radius:12px;border-left:4px solid #4a6cf7;">
+                    <p style="font-size:13px;color:#666;">
+                        <span class="material-icons" style="font-size:16px;vertical-align:middle;">info</span>
+                        Seus dados são protegidos de acordo com a LGPD.
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// HISTÓRICO
 // ============================================================
 async function renderHistorico() {
     pageContainer.innerHTML = `
@@ -1455,9 +1681,9 @@ async function renderHistorico() {
                     <option value="login">Login</option>
                     <option value="logout">Logout</option>
                 </select>
-                <input type="text" id="filterSearch" placeholder="Buscar por descrição..." style="flex:1;min-width:150px;">
-                <button class="btn btn-primary btn-sm" onclick="applyFilters()">🔍 Filtrar</button>
-                <button class="btn btn-outline btn-sm" onclick="clearFilters()">Limpar</button>
+                <input type="text" id="filterSearch" placeholder="Buscar por descrição..." style="flex:1;min-width:150px;padding:8px 14px;border:1px solid #ddd;border-radius:8px;">
+                <button onclick="applyFilters()" style="background:#4a6cf7;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">🔍 Filtrar</button>
+                <button onclick="clearFilters()" style="background:#666;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">Limpar</button>
             </div>
             
             <div id="actionsList">
@@ -1638,9 +1864,76 @@ window.viewActionDetail = function(actionId) {
                 </div>
             ` : ''}
         </div>
-        <button class="btn btn-outline" onclick="hideModal()">Fechar</button>
+        <button class="btn btn-outline" onclick="hideModal()" style="background:#666;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">Fechar</button>
     `);
 };
+
+// ============================================================
+// NOTIFICAÇÕES (PÁGINA COMPLETA)
+// ============================================================
+async function renderNotificacoes() {
+    if (!currentUser) {
+        pageContainer.innerHTML = '<div class="empty-state"><span class="material-icons">lock</span><h3>Faça login</h3></div>';
+        return;
+    }
+    
+    try {
+        // Usa as notificações já carregadas
+        const notifs = notifications;
+        const unread = notifs.filter(n => !n.lida).length;
+        
+        let html = `
+            <div class="page active">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:24px;">
+                    <div>
+                        <h1 class="page-title">🔔 Notificações</h1>
+                        <p class="page-subtitle">${notifs.length} notificações no total • ${unread} não lidas</p>
+                    </div>
+                    ${unread > 0 ? `
+                        <button onclick="markAllAsRead()" style="background:#4a6cf7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+                            <span class="material-icons" style="vertical-align:middle;">done_all</span> Marcar todas como lidas
+                        </button>
+                    ` : ''}
+                </div>
+        `;
+        
+        if (notifs.length === 0) {
+            html += `
+                <div class="empty-state">
+                    <span class="material-icons">notifications_off</span>
+                    <h3>Nenhuma notificação</h3>
+                    <p>Você não tem notificações no momento.</p>
+                </div>
+            `;
+        } else {
+            html += `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    ${notifs.map(notif => `
+                        <div class="card ${notif.lida ? '' : 'unread'}" style="${notif.lida ? '' : 'border-left: 4px solid #4a6cf7; background: #eef2ff;'}">
+                            <div class="card-header">
+                                <span class="card-title">${escapeHtml(notif.titulo || 'Notificação')}</span>
+                                <span style="font-size:12px; color:#999;">${getTimeAgo(notif.timestamp)}</span>
+                            </div>
+                            <div class="card-preview">${escapeHtml(notif.mensagem || '')}</div>
+                            <div class="card-meta" style="margin-top:12px;">
+                                ${notif.lida ? '<span style="color:#999;">✅ Lida</span>' : '<span style="color:#4a6cf7; font-weight:600;">🔵 Não lida</span>'}
+                                ${notif.tipo ? `<span style="color:#888;">📌 ${escapeHtml(notif.tipo)}</span>` : ''}
+                                ${!notif.lida ? `<button onclick="markAsRead('${notif.id}')" style="background:#4a6cf7; color:white; border:none; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:12px;">Marcar como lida</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        pageContainer.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Erro ao carregar notificações:', error);
+        pageContainer.innerHTML = `<div class="empty-state">❌ Erro ao carregar notificações: ${error.message}</div>`;
+    }
+}
 
 // ============================================================
 // PLATAFORMAS
@@ -1682,7 +1975,7 @@ async function renderPlataformas() {
                             ${actionCounts[p.id] || 0} ações registradas
                         </div>
                         <div style="text-align:center;margin-top:12px;">
-                            <span class="btn btn-sm btn-outline" onclick="event.stopPropagation();window.open('${p.url}','_blank')">Acessar →</span>
+                            <span class="btn btn-sm btn-outline" onclick="event.stopPropagation();window.open('${p.url}','_blank')" style="border:1px solid #4a6cf7;color:#4a6cf7;padding:6px 16px;border-radius:20px;cursor:pointer;">Acessar →</span>
                         </div>
                     </div>
                 `).join('')}
@@ -1710,8 +2003,8 @@ async function renderAdminActions() {
             <p class="page-subtitle">Visualize todas as ações de todos os usuários</p>
             
             <div class="filters">
-                <input type="text" id="adminFilterUser" placeholder="ID do Usuário..." style="flex:1;min-width:150px;">
-                <select id="adminFilterPlatform">
+                <input type="text" id="adminFilterUser" placeholder="ID do Usuário..." style="flex:1;min-width:150px;padding:8px 14px;border:1px solid #ddd;border-radius:8px;">
+                <select id="adminFilterPlatform" style="padding:8px 14px;border:1px solid #ddd;border-radius:8px;">
                     <option value="">Todas as Plataformas</option>
                     <option value="academico">📚 Biblioteca Científica</option>
                     <option value="jornal">📰 Jornal</option>
@@ -1719,8 +2012,8 @@ async function renderAdminActions() {
                     <option value="support">🎫 Help Desk</option>
                     <option value="central">🏠 Central do Usuário</option>
                 </select>
-                <button class="btn btn-primary btn-sm" onclick="applyAdminFilters()">🔍 Filtrar</button>
-                <button class="btn btn-outline btn-sm" onclick="clearAdminFilters()">Limpar</button>
+                <button onclick="applyAdminFilters()" style="background:#4a6cf7;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">🔍 Filtrar</button>
+                <button onclick="clearAdminFilters()" style="background:#666;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">Limpar</button>
             </div>
             
             <div id="adminActionsList">
@@ -1858,231 +2151,32 @@ function goToAdminPage(page) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-    // ============================================================
-// PÁGINA DE NOTIFICAÇÕES - ADICIONE NO FINAL DO CÓDIGO
-// ============================================================
-
-async function renderNotificacoes() {
-    if (!currentUser) {
-        pageContainer.innerHTML = '<div class="empty-state"><span class="material-icons">lock</span><h3>Faça login</h3></div>';
-        return;
-    }
-    
-    try {
-        const snapshot = await db.collection('notifications')
-            .where('userId', '==', currentUser.uid)
-            .orderBy('timestamp', 'desc')
-            .get();
-        
-        const notifs = [];
-        snapshot.forEach(doc => {
-            notifs.push({ id: doc.id, ...doc.data() });
-        });
-        
-        const unreadCount = notifs.filter(n => !n.lida).length;
-        
-        let html = `
-            <div class="page active">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:24px;">
-                    <div>
-                        <h1 class="page-title">🔔 Notificações</h1>
-                        <p class="page-subtitle">${notifs.length} notificações no total • ${unreadCount} não lidas</p>
-                    </div>
-                    ${unreadCount > 0 ? `
-                        <button class="btn btn-primary" onclick="markAllAsRead()" style="background:#4a6cf7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
-                            <i class="material-icons" style="vertical-align:middle;">done_all</i> Marcar todas como lidas
-                        </button>
-                    ` : ''}
-                </div>
-        `;
-        
-        if (notifs.length === 0) {
-            html += `
-                <div class="empty-state">
-                    <span class="material-icons">notifications_off</span>
-                    <h3>Nenhuma notificação</h3>
-                    <p>Você não tem notificações no momento.</p>
-                </div>
-            `;
-        } else {
-            html += `
-                <div style="display:flex; flex-direction:column; gap:12px;">
-                    ${notifs.map(notif => `
-                        <div class="card ${notif.lida ? '' : 'unread'}" style="${notif.lida ? '' : 'border-left: 4px solid #4a6cf7; background: #eef2ff;'}">
-                            <div class="card-header">
-                                <span class="card-title">${escapeHtml(notif.titulo || 'Notificação')}</span>
-                                <span style="font-size:12px; color:#999;">${getTimeAgo(notif.timestamp)}</span>
-                            </div>
-                            <div class="card-preview">${escapeHtml(notif.mensagem || '')}</div>
-                            <div class="card-meta" style="margin-top:12px;">
-                                ${notif.lida ? '<span style="color:#999;">✅ Lida</span>' : '<span style="color:#4a6cf7; font-weight:600;">🔵 Não lida</span>'}
-                                ${notif.tipo ? `<span style="color:#888;">📌 ${escapeHtml(notif.tipo)}</span>` : ''}
-                                ${!notif.lida ? `<button onclick="markAsRead('${notif.id}')" style="background:#4a6cf7; color:white; border:none; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:12px;">Marcar como lida</button>` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-        pageContainer.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Erro ao carregar notificações:', error);
-        pageContainer.innerHTML = `<div class="empty-state">❌ Erro ao carregar notificações: ${error.message}</div>`;
-    }
-}
-
-// Adicionar item no menu lateral para notificações
-function addNotificationMenuItem() {
-    const sidebar = document.getElementById('sidebar');
-    const divider = sidebar.querySelector('.sidebar-divider');
-    
-    // Verifica se já existe o item
-    if (document.querySelector('.sidebar-item[data-page="notificacoes"]')) return;
-    
-    const notifItem = document.createElement('a');
-    notifItem.className = 'sidebar-item';
-    notifItem.setAttribute('data-page', 'notificacoes');
-    notifItem.innerHTML = `
-        <span class="material-icons">notifications</span> Notificações
-        <span class="sidebar-badge" id="notifMenuBadge" style="background:#e94560;">${unreadCount}</span>
+// Toast
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${isError ? '#dc3545' : '#27ae60'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        z-index: 2000;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: fadeInOut 3s ease;
     `;
-    notifItem.addEventListener('click', () => {
-        navigateTo('notificacoes');
-    });
+    toast.textContent = message;
+    document.body.appendChild(toast);
     
-    // Insere após o item "Plataformas"
-    const plataformasItem = document.querySelector('.sidebar-item[data-page="plataformas"]');
-    if (plataformasItem) {
-        plataformasItem.parentNode.insertBefore(notifItem, plataformasItem.nextSibling);
-    } else {
-        sidebar.appendChild(notifItem);
-    }
-}
-
-// Sobrescrever a função navigateTo para incluir notificacoes
-const originalNavigateTo = navigateTo;
-navigateTo = function(page) {
-    if (page === 'notificacoes') {
-        renderNotificacoes();
-        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-        document.querySelector(`.sidebar-item[data-page="notificacoes"]`)?.classList.add('active');
-        return;
-    }
-    originalNavigateTo(page);
-};
-
-// Atualizar badge do menu quando mudar o número de não lidas
-function updateNotificationBadge() {
-    if (unreadCount > 0) {
-        notifBadge.style.display = 'flex';
-        notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-        
-        // Atualizar badge do menu
-        const menuBadge = document.getElementById('notifMenuBadge');
-        if (menuBadge) {
-            menuBadge.textContent = unreadCount;
-            menuBadge.style.display = 'inline';
-        }
-    } else {
-        notifBadge.style.display = 'none';
-        const menuBadge = document.getElementById('notifMenuBadge');
-        if (menuBadge) {
-            menuBadge.style.display = 'none';
-        }
-    }
-}
-
-// Adicionar item no menu ao carregar
-document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        if (currentUser && !isBanned) {
-            addNotificationMenuItem();
-        }
-    }, 1000);
-});
-
-// Sobrescrever o listener de notificações para atualizar o menu
-const originalListenNotifications = listenNotifications;
-listenNotifications = function() {
-    if (notificationListener) {
-        notificationListener();
-        notificationListener = null;
-    }
-    
-    if (!currentUser) return;
-    
-    notificationListener = db.collection('notifications')
-        .where('userId', '==', currentUser.uid)
-        .orderBy('timestamp', 'desc')
-        .limit(50)
-        .onSnapshot((snapshot) => {
-            notifications = [];
-            snapshot.forEach(doc => {
-                notifications.push({ id: doc.id, ...doc.data() });
-            });
-            
-            unreadCount = notifications.filter(n => !n.lida).length;
-            updateNotificationBadge();
-            renderNotifications();
-            
-            // Se estiver na página de notificações, recarrega
-            if (currentPage === 'notificacoes') {
-                renderNotificacoes();
-            }
-            
-            // Atualiza badge do menu
-            const menuBadge = document.getElementById('notifMenuBadge');
-            if (menuBadge) {
-                menuBadge.textContent = unreadCount;
-                menuBadge.style.display = unreadCount > 0 ? 'inline' : 'none';
-            }
-        }, (error) => {
-            console.error('Erro no listener de notificações:', error);
-        });
-};
-
-// Adicionar função para marcar todas como lidas na página
-window.markAllAsRead = async function(event) {
-    if (event) event.stopPropagation();
-    
-    if (unreadCount === 0) {
-        if (currentPage === 'notificacoes') {
-            renderNotificacoes();
-        }
-        return;
-    }
-    
-    try {
-        const batch = db.batch();
-        const unreadNotifs = notifications.filter(n => !n.lida);
-        
-        unreadNotifs.forEach(notif => {
-            const ref = db.collection('notifications').doc(notif.id);
-            batch.update(ref, { lida: true });
-        });
-        
-        await batch.commit();
-        
-        notifications.forEach(n => n.lida = true);
-        unreadCount = 0;
-        updateNotificationBadge();
-        renderNotifications();
-        
-        // Se estiver na página de notificações, recarrega
-        if (currentPage === 'notificacoes') {
-            renderNotificacoes();
-        }
-        
-        showToast('✅ Todas as notificações marcadas como lidas!', 'success');
-        
-    } catch (error) {
-        console.error('Erro ao marcar todas como lidas:', error);
-        showToast('❌ Erro ao marcar como lidas', 'error');
-    }
-};
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
 </script>
 </body>
 </html>
