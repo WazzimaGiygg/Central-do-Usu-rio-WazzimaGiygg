@@ -1181,13 +1181,18 @@ function showBannedScreen(reason = 'Violação das políticas de uso') {
     document.querySelector('.header').style.pointerEvents = 'none';
 }
 
+// ============================================================
+// FUNÇÃO LOGOUT BANNED - CORRIGIDA
+// ============================================================
 async function logoutBanned() {
     try {
         await auth.signOut();
-        location.reload();
+        // Redireciona para a página inicial em vez de recarregar
+        window.location.href = 'https://wazzimagiygg.com';
     } catch (error) {
         console.error('Erro ao fazer logout:', error);
-        location.reload();
+        // Fallback: redireciona mesmo com erro
+        window.location.href = 'https://wazzimagiygg.com';
     }
 }
 
