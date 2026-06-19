@@ -891,7 +891,6 @@ async function loadNotifications() {
             notifications.push({ 
                 id: doc.id, 
                 ...doc.data(),
-                // Garantir que timestamp seja um objeto Date
                 timestamp: doc.data().timestamp || new Date()
             });
         });
@@ -1448,6 +1447,7 @@ googleLoginBtn.addEventListener('click', loginWithGoogle);
 console.log('🚀 Central do Usuário WazzimaGiygg - Versão com Notificações');
 console.log('📌 Coleção de notificações: "notifications"');
 console.log('🔔 Sistema de notificações integrado com o sistema de advertências');
+console.log('👤 Usuário pode ver e gerenciar suas notificações');
 </script>
 </body>
 </html>
